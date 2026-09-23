@@ -14,7 +14,7 @@ export default function QuestionsSection() {
         },
         {
             question: '¿Qué amenidades incluye la estancia?',
-            answer: 'Todas nuestras habitaciones incluyen Wi-Fi, desayuno continental, acceso a áreas comunes y estacionamiento.',
+            answer: 'Todas nuestras habitaciones incluyen Wi-Fi, acceso a áreas comunes y estacionamiento ( sujeto a disponibilidad ).',
         },
         {
             question: '¿Qué actividades hay cerca del hotel?',

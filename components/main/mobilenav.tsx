@@ -70,13 +70,13 @@ export default function MobileNav() {
 
         {/* Botones */}
         <div className="flex items-center gap-2">
-          <Link
+          {/* <Link
             href="/reservar"
             onClick={handleClose}
             className="bg-[#d95d39] text-white text-xs font-bold px-3 py-2 rounded-full active:bg-[#c44f2e] transition-colors shadow-sm tracking-wider uppercase"
           >
             RESERVAR
-          </Link>
+          </Link> */}
 
           <button
             type="button"
@@ -121,31 +121,22 @@ export default function MobileNav() {
                   Habitaciones
                 </Link>
               </li>
+              
               <li>
-                <Link href="/gastronomia" onClick={handleClose} className="block py-2 border-b border-[#e5ded0]/50 hover:text-[#c0a060]">
-                  Gastronomía
+                <Link href="/guia-turistica" onClick={handleClose} className="block py-2 border-b border-[#e5ded0]/50 hover:text-[#c0a060]">
+                  Guia Turistica
                 </Link>
               </li>
               <li>
-                <Link href="/experiencias" onClick={handleClose} className="block py-2 border-b border-[#e5ded0]/50 hover:text-[#c0a060]">
-                  Experiencias
+                <Link href="/nosotros" onClick={handleClose} className="block py-2 border-b border-[#e5ded0]/50 hover:text-[#c0a060]">
+                  Nosotros
                 </Link>
               </li>
-              <li>
-                <Link href="/servicios" onClick={handleClose} className="block py-2 border-b border-[#e5ded0]/50 hover:text-[#c0a060]">
-                  Servicios
-                </Link>
-              </li>
-              <li>
-                <Link href="/ubicacion" onClick={handleClose} className="block py-2 border-b border-[#e5ded0]/50 hover:text-[#c0a060]">
-                  Ubicación
-                </Link>
-              </li>
-              <li className="pt-4">
+              {/* <li className="pt-4">
                 <Link href="/login" onClick={handleClose} className="block py-3 text-sm font-bold text-[#5a524c] bg-[#e5ded0]/40 text-center rounded-lg">
                   LOGIN / MI RESERVA
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </nav>
         </div>,
