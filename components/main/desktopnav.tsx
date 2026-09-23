@@ -83,6 +83,9 @@ export default function DesktopNav() {
 
         {/* Links */}
         <nav className="flex items-center gap-8 text-xs font-semibold tracking-widest text-white uppercase">
+          <Link href="/" className="hover:text-[#c0a060] transition-colors">
+            Inicio
+          </Link>
           <Link href="/habitaciones" className="hover:text-[#c0a060] transition-colors">
             HABITACIONES
           </Link>
