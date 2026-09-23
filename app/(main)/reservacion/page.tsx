@@ -79,8 +79,7 @@ export default function ReservationPage() {
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Columna Izquierda: Formulario (2 columnas en desktop) */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
+          <div className="lg:col-span-2 flex flex-col gap-6 order-2 lg:order-1">
             <GuestDetailsForm formData={guestDetails} onChange={handleGuestChange} />
             <PaymentMethodForm
               paymentData={paymentData}
@@ -91,8 +90,7 @@ export default function ReservationPage() {
             />
           </div>
 
-          {/* Columna Derecha: Resumen de Reserva */}
-          <div>
+          <div className="order-1 lg:order-2">
             <ReservationSummary
               checkIn={checkIn}
               checkOut={checkOut}
