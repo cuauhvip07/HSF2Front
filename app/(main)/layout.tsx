@@ -15,8 +15,7 @@ export default function MainLayout({
   return (
     <>
       <Header />
-
-      <main className="min-h-screen bg-[#f7f4ed]">
+      <main className="min-h-screen bg-[#f7f4ed] md:pt-29">
         {children}
       </main>
 
