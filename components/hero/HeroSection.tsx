@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import SearchBarDesktop from './SearchBarDesktop';
 import MobileHeroActions from './MobileHeroActions';
 
@@ -21,7 +22,7 @@ export default function HeroSection() {
       </div>
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 text-center text-[#f7f4ed] flex flex-col items-center gap-6 pt-16">
-        <h1 className="text-4xl md:text-6xl font-serif tracking-wider uppercase font-light drop-shadow-md">
+        <h1 className="text-4xl md:text-6xl font-serif tracking-wider uppercase font-light drop-shadow-md leading-tight">
           Tu refugio de calidez y confort
         </h1>
         <p className="text-lg md:text-xl font-light tracking-wide max-w-xl opacity-90 drop-shadow">
@@ -29,7 +30,19 @@ export default function HeroSection() {
         </p>
 
         <div className="w-full mt-6">
-          <SearchBarDesktop />
+          {/* <SearchBarDesktop /> */}
+
+          {/* CTA para Desktop mientras el buscador esté desactivado */}
+          <div className="hidden md:flex justify-center items-center">
+            <Link
+              href="/habitaciones"
+              className="bg-[#d95d39] hover:bg-[#c44f2e] text-white text-xs font-bold px-8 py-3.5 rounded-full transition-all shadow-lg hover:shadow-xl uppercase tracking-widest border border-white/20 hover:scale-105"
+            >
+              EXPLORAR HABITACIONES
+            </Link>
+          </div>
+
+          {/* Acciones para vista celular */}
           <MobileHeroActions />
         </div>
       </div>

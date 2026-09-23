@@ -49,11 +49,11 @@ export default function DesktopNav() {
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-[11px] font-medium tracking-wide">
+        {/* <div className="flex items-center gap-4 text-[11px] font-medium tracking-wide">
           <Link href="/login" className="hover:text-[#2d2926] tracking-wider uppercase font-semibold">
             LOGIN
           </Link>
-        </div>
+        </div> */}
       </div>
 
       {/* 2. BARRA PRINCIPAL DE NAVEGACIÓN */}
@@ -86,27 +86,21 @@ export default function DesktopNav() {
           <Link href="/habitaciones" className="hover:text-[#c0a060] transition-colors">
             HABITACIONES
           </Link>
-          <Link href="/gastronomia" className="hover:text-[#c0a060] transition-colors">
-            GASTRONOMÍA
+          <Link href="/guia-turistica" className="hover:text-[#c0a060] transition-colors">
+            GUIA TURISTICA
           </Link>
-          <Link href="/experiencias" className="hover:text-[#c0a060] transition-colors">
-            EXPERIENCIAS
-          </Link>
-          <Link href="/servicios" className="hover:text-[#c0a060] transition-colors">
-            SERVICIOS
-          </Link>
-          <Link href="/ubicacion" className="hover:text-[#c0a060] transition-colors">
-            UBICACIÓN
+          <Link href="/nosotros" className="hover:text-[#c0a060] transition-colors">
+            NOSOTROS
           </Link>
         </nav>
 
         {/* Botón CTA */}
-        <Link
+        {/* <Link
           href="/reservar"
           className="bg-[#d95d39] text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-[#c44f2e] transition-colors shadow-md tracking-wider uppercase"
         >
           RESERVAR AHORA
-        </Link>
+        </Link> */}
       </div>
     </div>
   );
