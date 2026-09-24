@@ -39,9 +39,9 @@ export default function RoomsPage() {
 
         {/* Aclaraciones y Políticas Legales */}
         <div className="text-center text-xs text-[#988f86] max-w-2xl mx-auto space-y-1 pt-4 border-t border-[#e5ded0]">
-          <p>* Check-in: 15:00 hrs | Check-out: 12:00 hrs[cite: 1].</p>
-          <p>* Estacionamiento privado gratis sujeto a disponibilidad[cite: 1].</p>
-          <p>* Las tarifas promocionales entre semana no aplican en días festivos ni puentes oficiales[cite: 1].</p>
+          <p>* Check-in: 15:00 hrs | Check-out: 12:00 hrs.</p>
+          <p>* Estacionamiento privado gratis sujeto a disponibilidad.</p>
+          <p>* Las tarifas promocionales entre semana no aplican en días festivos ni puentes oficiales.</p>
         </div>
       </div>
 
