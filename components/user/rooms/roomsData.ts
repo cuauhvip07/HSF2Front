@@ -1,58 +1,57 @@
-export interface Room {
-  id: string;
-  name: string;
-  capacity: number;
+import { Room } from '@/types/room';
+
+export interface RoomDetail extends Room {
   beds: string;
-  image: string;
-  priceWeekday: number;
-  priceWeekend: number;
-  priceHighSeason: number;
   features: string[];
 }
 
-export const ROOMS_DATA: Room[] = [
+export const ROOMS_DATA: RoomDetail[] = [
   {
-    id: 'doble',
-    name: 'Habitación Doble',
-    capacity: 2,
-    beds: '1 Cama Matrimonial',
-    image: '/habitaciones/habitacion1.jpeg',
-    priceWeekday: 390,
-    priceWeekend: 450,
-    priceHighSeason: 450,
-    features: ['Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis', 'TV por cable']
-  },
-  {
-    id: 'doble-sencilla',
-    name: 'Habitación Doble Sencilla',
-    capacity: 3,
-    beds: '1 Cama Matrimonial + 1 Individual',
+    id: 1,
+    title: 'Habitación Doble',
+    capacity: '2 Personas',
+    description: 'Ideal para parejas o viajes individuales de descanso.',
+    priceMin: '$390 MXN',
+    priceRegular: '$450 MXN',
+    priceHigh: '$450 MXN',
     image: '/habitaciones/habitacion2.jpeg',
-    priceWeekday: 550,
-    priceWeekend: 650,
-    priceHighSeason: 590,
+    beds: '1 Cama Matrimonial',
     features: ['Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis', 'TV por cable']
   },
   {
-    id: 'cuadruple',
-    name: 'Habitación Cuádruple',
-    capacity: 4,
-    beds: '2 Camas Matrimoniales',
+    id: 2,
+    title: 'Habitación Doble Sencilla',
+    capacity: '3 Personas',
+    description: 'Comodidad para pequeñas familias o tríos de viaje.',
+    priceMin: '$550 MXN',
+    priceRegular: '$650 MXN',
+    priceHigh: '$590 MXN',
+    image: '/habitaciones/habitacion1.jpeg',
+    beds: '1 Cama Matrimonial + 1 Individual',
+    features: ['Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis', 'TV por cable']
+  },
+  {
+    id: 3,
+    title: 'Habitación Cuádruple',
+    capacity: '4 Personas',
+    description: 'Amplio espacio pensado para el confort de familias.',
+    priceMin: '$590 MXN',
+    priceRegular: '$750 MXN',
+    priceHigh: '$690 MXN',
     image: '/habitaciones/habitacion3.jpeg',
-    priceWeekday: 590,
-    priceWeekend: 750,
-    priceHighSeason: 690,
+    beds: '2 Camas Matrimoniales',
     features: ['Espaciosa', 'Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis']
   },
   {
-    id: 'triple-familiar',
-    name: 'Habitación Triple Familiar',
-    capacity: 6,
+    id: 4,
+    title: 'Habitación Triple Familiar',
+    capacity: '6 Personas',
+    description: 'Máxima capacidad para grupos grandes con la mejor comodidad.',
+    priceMin: '$890 MXN',
+    priceRegular: '$1,050 MXN',
+    priceHigh: '$990 MXN',
+    image: '/habitaciones/habitacion5.jpeg',
     beds: '3 Camas Matrimoniales',
-    image: '/habitaciones/habitacion5.jpeg', // Usamos la imagen 5 para la familiar de 6 personas
-    priceWeekday: 890,
-    priceWeekend: 1050,
-    priceHighSeason: 990,
-    features: ['Ideal familias/grupos', 'Baño privado', 'Agua caliente 24/7', 'Wi-Fi']
+    features: ['Ideal familias/grupos', 'Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis']
   }
 ];
