@@ -14,17 +14,18 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onSelect, isFirst = fa
   return (
     <article className="bg-[#ffffff] border border-[#e5ded0] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
       <div>
-        {/* Foto de la Habitación con badge de capacidad */}
+        {/* Foto de la Habitación con badge de capacidad y SEO Optimizado */}
         <div className="relative aspect-[16/9] bg-[#2d2926]">
           <Image
             src={room.image}
-            alt={room.title}
+            alt={`${room.title} en Hotel Santa Fe Chignahuapan Puebla`}
             fill
+            quality={75}
             priority={isFirst}
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          <span className="absolute top-4 left-4 bg-[#c0a060] text-[#2d2926] text-xs font-bold px-3 py-1 rounded-md shadow-md">
+          <span className="absolute top-4 left-4 bg-[#c0a060] text-[#2d2926] text-xs font-bold px-3 py-1.5 rounded-md shadow-md">
             Hasta {room.capacity}
           </span>
         </div>
@@ -72,12 +73,12 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onSelect, isFirst = fa
         </div>
       </div>
 
-      {/* Botón que activa el modal reutilizable */}
+      {/* Botón de acción adaptado para interacción con el pulgar en celulares */}
       <div className="p-6 pt-0">
         <button
           type="button"
           onClick={() => onSelect(room)}
-          className="block w-full text-center bg-[#2d2926] hover:bg-[#d95d39] text-[#ffffff] font-semibold py-3 rounded-xl transition-colors text-sm shadow-sm cursor-pointer"
+          className="flex items-center justify-center w-full min-h-[48px] text-center bg-[#2d2926] hover:bg-[#d95d39] text-[#ffffff] font-semibold py-3.5 px-4 rounded-xl transition-all text-sm shadow-sm cursor-pointer active:scale-98"
         >
           Reservar / Contacto
         </button>
