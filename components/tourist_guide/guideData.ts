@@ -7,6 +7,7 @@ export interface TouristAttraction {
   tips?: string[];
   badge?: string;
   image: string;
+  secondaryImage?: string;
 }
 
 export interface CalendarEvent {
@@ -40,7 +41,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Cultura & Historia",
     badge: "2 min a pie",
     description: "Inicia su construcción a principios de 1871, terminándose en noviembre del mismo año. El motivo de su construcción fue crear un espacio adecuado para las presentaciones y celebraciones de 'El Cuerpo Filarmónico'. Es el único kiosko en el país que cuenta con una fuente debajo de su plataforma principal.",
-    image: "/basilica.png"
+    image: "/tourist_guide/kiosko.jpeg"
   },
   {
     id: "palacio-municipal-y-mural",
@@ -49,7 +50,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Cultura & Historia",
     badge: "En el Centro Histórico",
     description: "El 15 de Mayo de 1882 se colocó la primera piedra para iniciar la construcción del Palacio Municipal. La obra concluyó en 1910 mediante aportaciones de diez centavos de los ciudadanos. En la entrada al palacio se encuentra un par de murales que cuentan todo lo que es Chignahuapan, desde la leyenda prehispánica que narra su fundación hasta la tradicional danza de los Santiagueros.",
-    image: "/basilica.png"
+    image: "/tourist_guide/mural_cos.jpeg"
   },
   {
     id: "casa-del-ajolote",
@@ -57,8 +58,9 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     subtitle: "Conservación y educación ecológica",
     category: "Naturaleza & Relax",
     badge: "Ideal para familias",
-    description: "Ubicada en el centro de Chignahuapan, la Casa del Ajolote es un espacio único dedicado a la conservación y educación sobre una de las especies más fascinantes y emblemáticas de México: el ajolote. Combina un enfoque educativo, recreativo y ecológico, ideal para visitantes de todas las edades.",
-    image: "/basilica.png"
+    description: "Ubicada en el centro de Chignahuapan, la Casa del Ajolote es un espacio único dedicado a la conservación y educación sobre una de las especies más fascinantes y emblemáticas de México: el ajolote.",
+    image: "/tourist_guide/axolote.jpeg",
+    secondaryImage: "/tourist_guide/casa_axolote.jpg"
   },
   {
     id: "laguna-de-chignahuapan",
@@ -67,20 +69,8 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Naturaleza & Relax",
     badge: "12 min a pie / 3 min auto",
     description: "La Laguna de Chignahuapan es uno de los sitios más emblemáticos y tranquilos de la región. Rodeada por un paisaje natural que invita al descanso y la contemplación. Tiene una conexión especial con las tradiciones locales, ya que en ciertas épocas del año se realizan eventos culturales y recreativos en sus alrededores.",
-    image: "/basilica.png"
-  },
-  {
-    id: "poza-de-agua-termal",
-    title: "Pozas y Aguas Termales",
-    subtitle: "Toma un tiempo de relajación",
-    category: "Naturaleza & Relax",
-    badge: "15 min en auto",
-    description: "El balneario de aguas termales en Chignahuapan es uno de los destinos más visitados de la región, conocido por sus propiedades curativas y su ambiente relajante. Sus aguas templadas son de tonalidad azul turquesa debido a que contienen azufre y calcio, elementos beneficiosos para el cuerpo.",
-    tips: [
-      "Para acceder a la poza natural hay que caminar unos 30 min.",
-      "Te recomendamos visitarla en primavera o verano para evitar los meses fríos."
-    ],
-    image: "/basilica.png"
+    image: "/tourist_guide/laguna1.jpeg",
+    secondaryImage: "/tourist_guide/laguna2.jpeg"
   },
   {
     id: "cascadas-quetzalapan",
@@ -92,7 +82,8 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     tips: [
       "Ofrece actividades como tirolesa, puentes colgantes y espacios ideales para día de campo."
     ],
-    image: "/basilica.png"
+    image: "/tourist_guide/cascada_quet.jpeg",
+    secondaryImage: "/tourist_guide/cascada_quet2.jpeg"
   },
   {
     id: "cascadas-tuliman-brisas",
@@ -101,7 +92,8 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Naturaleza & Relax",
     badge: "Parque Ecoturístico",
     description: "Cascadas de Tulimán: Dividido en tres partes con bajada hacia cabañas y cascada (3.15 m de altura), puentes colgantes y área de tirolesa, rapel y tiro con arco. Cascadas Las Brisas: Parque ecoturístico con vista a la segunda cascada más alta de México (350 m de altura) con senderismo, tiro con arco y escalada en árbol.",
-    image: "/basilica.png"
+    image: "/tourist_guide/cascada_tuliman.jpg",
+    secondaryImage: "/tourist_guide/cascada_tuliman2.jpg"
   },
   {
     id: "paseo-de-las-catrinas",
@@ -110,7 +102,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Experiencias",
     badge: "Recorrido artístico",
     description: "Es un recorrido cultural y artístico ubicado en Chignahuapan que rinde homenaje a una de las tradiciones más icónicas de México: el Día de Muertos. Este pintoresco lugar destaca por sus coloridos murales y esculturas que reflejan la riqueza cultural y artística de la región.",
-    image: "/basilica.png"
+    image: "/tourist_guide/paseo_catrinas.jpeg",
   },
   {
     id: "reloj-monumental",
@@ -119,7 +111,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Cultura & Historia",
     badge: "Frente a la Laguna",
     description: "Se encuentra ubicado a la orilla de la Laguna de Chignahuapan, en un entorno que combina naturaleza, cultura y tranquilidad. Este imponente reloj es un símbolo del pueblo, destacando por su diseño y su ubicación estratégica frente al agua.",
-    image: "/basilica.png"
+    image: "/tourist_guide/reloj.jpeg",
   },
   {
     id: "parroquia-santiago-apostol",
@@ -128,7 +120,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Cultura & Historia",
     badge: "5 min a pie",
     description: "Construida por los franciscanos en el siglo XVIII. Destaca por su sorprendente fachada muestra del estilo barroco indígena que se caracteriza por la profusión de imágenes y decoración con motivos fitomorfos, sosteniendo cuernos de la abundancia.",
-    image: "/basilica.png"
+    image: "/tourist_guide/santiago.webp",
   },
   {
     id: "basilica-inmaculada-concepcion",
@@ -146,7 +138,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Cultura & Historia",
     badge: "Ixtlahuaca",
     description: "Es considerado peculiar porque alberga en su interior un minúsculo hongo natural petrificado hallado en 1880, en cuya superficie se pueden apreciar diversas imágenes religiosas, entre las que destaca la de Cristo crucificado.",
-    image: "/basilica.png"
+    image: "/tourist_guide/santuario_honguito.jpeg",
   },
   {
     id: "esferas-artesanias-dulces",
@@ -155,7 +147,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Experiencias",
     badge: "Tradición Local",
     description: "Chignahuapan es famoso por su riqueza artesanal, destacándose las esferas navideñas de vidrio soplado decoradas a mano y sus dulces típicos. Estas creaciones reflejan la tradición, creatividad y destreza de los artesanos locales.",
-    image: "/basilica.png"
+    image: "/tourist_guide/esfera.jpeg",
   },
   {
     id: "gastronomia-chignahuapan",
@@ -167,7 +159,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     tips: [
       "Los dulces de Chignahuapan son otra expresión de la tradición local con sabores que evocan las raíces del pueblo."
     ],
-    image: "/basilica.png"
+    image: "/tourist_guide/gastronomia.jpeg",
   },
   {
     id: "zacatlan-plaza-municipal",
@@ -176,7 +168,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Zacatlán",
     badge: "Pueblo Vecino",
     description: "Plaza Principal: Bello lugar de encuentro donde destaca su monumental reloj de cinco metros de diámetro adornado con coloridas flores. Palacio Municipal: Edificio con un sobrio estilo neoclásico de fines del siglo XIX.",
-    image: "/basilica.png"
+    image: "/tourist_guide/reloj_zacatlan.jpg",
   },
   {
     id: "zacatlan-mirador-vitromurales",
@@ -185,7 +177,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Zacatlán",
     badge: "Imperdible en Zacatlán",
     description: "Mirador de Cristal: A 300 m del zócalo sobre el Paseo de la Barranca, permite disfrutar de la Barranca de los Jilgueros y la cascada de Las Tres Marías. Vitromurales: 100 m de longitud compuestos por 12 grandes mosaicos en forma de manzana con piezas de cristal, talavera y espejos.",
-    image: "/basilica.png"
+    image: "/tourist_guide/mirador.png",
   },
   {
     id: "zacatlan-museo-reloj-valle",
@@ -194,7 +186,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Zacatlán",
     badge: "Atractivos Únicos",
     description: "Museo del Reloj: Zacatlán es cuna de relojes monumentales; el museo exhibe la historia de la medición del tiempo y ofrece show de autómatas los sábados a las 21:00 hrs. Valle de Piedras Encimadas: Parque ecoturístico de 2000 hectáreas con formaciones rocosas únicas a 25 km de Zacatlán.",
-    image: "/basilica.png"
+    image: "/tourist_guide/museo_reloj.jpg",
   },
   {
     id: "zacatlan-parroquia-san-pedro",
@@ -203,7 +195,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Zacatlán",
     badge: "5 min del centro",
     description: "Data del siglo XVII con fachada estilo barroco sobrio y altar blanco laminado en oro. Frente a ella se ubica el Conjunto Conventual construido entre 1562 y 1567, siendo la construcción monumental más antigua del estado.",
-    image: "/basilica.png"
+    image: "/tourist_guide/parroquia_sanpedro.jpeg",
   },
   {
     id: "zacatlan-ex-convento-franciscano",
@@ -212,7 +204,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Zacatlán",
     badge: "Centro de Zacatlán",
     description: "Construido entre 1562 y 1567, es el convento en funciones más antiguo de América. En el año 1585 fue uno de los 60 conventos con que contó la provincia franciscana del Santo Evangelio de México.",
-    image: "/basilica.png"
+    image: "/tourist_guide/convento_franciscano.jpg",
   },
   {
     id: "zacatlan-productos-artesanales",
@@ -224,7 +216,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     tips: [
       "Puedes llevarte una buena dotación de las mejores sidras del país."
     ],
-    image: "/basilica.png"
+    image: "/tourist_guide/vinos.jpeg",
   },
   {
     id: "zacatlan-gastronomia",
@@ -233,7 +225,7 @@ export const ATTRACTIONS_DATA: TouristAttraction[] = [
     category: "Gastronomía",
     badge: "Gastronomía Vecina",
     description: "Oferta de antojitos como sopes, tlacoyos, chalupas y variedad de tamales (mole, frijol, rajas y dulces). Es imprescindible probar su prestigiado pan relleno de queso y requesón, muy típico durante Día de Muertos.",
-    image: "/basilica.png"
+    image: "/tourist_guide/gastronomia_zacatlan.jpeg",
   }
 ];
 
