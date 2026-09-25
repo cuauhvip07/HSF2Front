@@ -6,9 +6,10 @@ import { TouristAttraction } from './guideData';
 
 interface AttractionCardProps {
     attraction: TouristAttraction;
+    isFirstCard?: boolean;
 }
 
-export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) => {
+export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction, isFirstCard = false }) => {
 
     // --- LÓGICA DE LAYOUT DINÁMICO (Estilo Libreto) ---
     const isFullImageBackground = attraction.id === 'bienvenida-y-clima';
@@ -67,8 +68,10 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                 <div className="relative min-h-[400px] flex items-center">
                     <Image
                         src={attraction.image}
-                        alt={attraction.title}
+                        alt={`${attraction.title} - Chignahuapan Pueblo Mágico Puebla`}
                         fill
+                        quality={75}
+                        priority={isFirstCard}
                         className="object-cover z-0"
                         sizes="100vw"
                     />
@@ -91,10 +94,12 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                         <div className="relative w-64 h-64 rounded-full overflow-hidden border-4 border-[#e5ded0] shadow-xl z-10">
                             <Image
                                 src={attraction.image}
-                                alt={attraction.title}
+                                alt={`${attraction.title} - Turismo en Chignahuapan Puebla`}
                                 fill
+                                quality={75}
+                                priority={isFirstCard}
                                 className="object-cover"
-                                sizes="(max-width: 768px) 100vw, 30vw"
+                                sizes="(max-width: 768px) 80vw, 30vw"
                             />
                         </div>
                         <div className="absolute top-10 left-10 w-20 h-20 bg-[#d95d39]/10 rounded-full blur-2xl z-0" />
@@ -116,18 +121,21 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                         <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-[#e5ded0]/20">
                             <Image
                                 src={attraction.image}
-                                alt={`${attraction.title} 1`}
+                                alt={`${attraction.title} - Atractivo natural cerca de Chignahuapan`}
                                 fill
+                                quality={75}
+                                priority={isFirstCard}
                                 className="object-cover"
                                 sizes="(max-width: 768px) 50vw, 20vw"
                             />
                         </div>
-                        {/* Foto 2: Imagen Secundaria (independiente) */}
+                        {/* Foto 2: Imagen Secundaria */}
                         <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-[#e5ded0]/20 mt-4">
                             <Image
                                 src={attraction.secondaryImage || attraction.image}
-                                alt={`${attraction.title} 2`}
+                                alt={`${attraction.title} - Vista panorámica Chignahuapan Puebla`}
                                 fill
+                                quality={75}
                                 className="object-cover"
                                 sizes="(max-width: 768px) 50vw, 20vw"
                             />
@@ -142,8 +150,10 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                     <div className="md:col-span-5 relative min-h-[260px] bg-[#2d2926]">
                         <Image
                             src={attraction.image}
-                            alt={attraction.title}
+                            alt={`${attraction.title} - Hotel Santa Fe Chignahuapan`}
                             fill
+                            quality={75}
+                            priority={isFirstCard}
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, 40vw"
                         />
