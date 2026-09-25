@@ -1,10 +1,12 @@
 'use client';
 
-interface GuestFiltersProps {
+import { Dispatch, SetStateAction } from 'react';
+
+export interface GuestFiltersProps {
   searchTerm: string;
-  setSearchTerm: (value: string) => void;
+  setSearchTerm: Dispatch<SetStateAction<string>> | ((value: string) => void);
   selectedFilter: string;
-  setSelectedFilter: (filter: string) => void;
+  setSelectedFilter: Dispatch<SetStateAction<string>> | ((filter: string) => void);
   onNewGuest?: () => void;
 }
 
@@ -65,16 +67,18 @@ export default function GuestFilters({
       </div>
 
       {/* Botón Registrar Nuevo Huésped */}
-      <button
-        type="button"
-        onClick={onNewGuest}
-        className="bg-[#d95d39] hover:bg-[#c44f2e] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-sm tracking-wider uppercase flex items-center justify-center gap-2 whitespace-nowrap"
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-        + NUEVO HUÉSPED
-      </button>
+      {onNewGuest && (
+        <button
+          type="button"
+          onClick={onNewGuest}
+          className="bg-[#d95d39] hover:bg-[#c44f2e] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-sm tracking-wider uppercase flex items-center justify-center gap-2 whitespace-nowrap"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Nuevo Huésped
+        </button>
+      )}
     </div>
   );
 }

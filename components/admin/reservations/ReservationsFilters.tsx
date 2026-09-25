@@ -5,6 +5,8 @@ interface ReservationFiltersProps {
   setSearchTerm: (value: string) => void;
   selectedStatus: string;
   setSelectedStatus: (status: string) => void;
+  selectedDate: string | null;
+  setSelectedDate: (date: string | null) => void;
   onNewReservation?: () => void;
 }
 
@@ -15,12 +17,14 @@ export default function ReservationFilters({
   setSearchTerm,
   selectedStatus,
   setSelectedStatus,
+  selectedDate,
+  setSelectedDate,
   onNewReservation,
 }: ReservationFiltersProps) {
   return (
-    <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#e5ded0] shadow-sm">
+    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#e5ded0] shadow-sm">
       {/* Buscador */}
-      <div className="relative flex-1 min-w-[280px]">
+      <div className="relative flex-1 min-w-[240px]">
         <input
           type="text"
           value={searchTerm}
@@ -43,8 +47,27 @@ export default function ReservationFilters({
         </svg>
       </div>
 
+      {/* Selector de Fecha */}
+      <div className="flex items-center gap-2">
+        <input
+          type="date"
+          value={selectedDate || ''}
+          onChange={(e) => setSelectedDate(e.target.value || null)}
+          className="bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-lg px-3 py-2 text-xs font-semibold text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
+        />
+        {selectedDate && (
+          <button
+            type="button"
+            onClick={() => setSelectedDate(null)}
+            className="text-xs text-[#d95d39] font-bold hover:underline whitespace-nowrap"
+          >
+            Limpiar fecha
+          </button>
+        )}
+      </div>
+
       {/* Filtros de Estado */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
         {statusOptions.map((status) => {
           const isActive = selectedStatus === status;
           return (
