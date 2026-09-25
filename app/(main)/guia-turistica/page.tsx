@@ -13,33 +13,44 @@ export default function TouristGuidePage() {
 
   const handleSelectAttraction = (id: string) => {
     setActiveId(id);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    // Optimización 1: Evita el reflow forzado al diferir el desplazamiento al siguiente cuadro
+    requestAnimationFrame(() => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-20% 0px -60% 0px' }
-    );
+    let observer: IntersectionObserver | null = null;
 
-    ATTRACTIONS_DATA.forEach((item) => {
-      const el = document.getElementById(item.id);
-      if (el) observer.observe(el);
-    });
+    // Optimización 2: Se difiere la consulta al DOM para no interrumpir la pintura inicial
+    const timer = setTimeout(() => {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveId(entry.target.id);
+            }
+          });
+        },
+        { rootMargin: '-20% 0px -60% 0px' }
+      );
 
-    const calendarEl = document.getElementById('calendario-eventos');
-    if (calendarEl) observer.observe(calendarEl);
+      ATTRACTIONS_DATA.forEach((item) => {
+        const el = document.getElementById(item.id);
+        if (el && observer) observer.observe(el);
+      });
 
-    return () => observer.disconnect();
+      const calendarEl = document.getElementById('calendario-eventos');
+      if (calendarEl && observer) observer.observe(calendarEl);
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+      if (observer) observer.disconnect();
+    };
   }, []);
 
   return (

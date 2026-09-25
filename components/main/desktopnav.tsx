@@ -7,11 +7,20 @@ export default function DesktopNav() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+      // Optimización: Solo programamos una lectura si no hay un frame en proceso
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          setIsScrolled((prev) => {
+            const nextState = currentScrollY > 20;
+            return prev !== nextState ? nextState : prev; // Evita re-renders innecesarios
+          });
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
@@ -48,12 +57,6 @@ export default function DesktopNav() {
             </a>
           </span>
         </div>
-
-        {/* <div className="flex items-center gap-4 text-[11px] font-medium tracking-wide">
-          <Link href="/login" className="hover:text-[#2d2926] tracking-wider uppercase font-semibold">
-            LOGIN
-          </Link>
-        </div> */}
       </div>
 
       {/* 2. BARRA PRINCIPAL DE NAVEGACIÓN */}
@@ -96,14 +99,6 @@ export default function DesktopNav() {
             NOSOTROS
           </Link>
         </nav>
-
-        {/* Botón CTA */}
-        {/* <Link
-          href="/reservar"
-          className="bg-[#d95d39] text-white text-xs font-bold px-6 py-2.5 rounded-full hover:bg-[#c44f2e] transition-colors shadow-md tracking-wider uppercase"
-        >
-          RESERVAR AHORA
-        </Link> */}
       </div>
     </div>
   );

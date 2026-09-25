@@ -14,7 +14,7 @@ export const ROOMS_DATA: RoomDetail[] = [
     priceMin: '$390 MXN',
     priceRegular: '$450 MXN',
     priceHigh: '$450 MXN',
-    image: '/habitaciones/habitacion2.jpeg',
+    image: '/habitaciones/habitacion2.webp',
     beds: '1 Cama Matrimonial',
     features: ['Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis', 'TV por cable']
   },
@@ -26,7 +26,7 @@ export const ROOMS_DATA: RoomDetail[] = [
     priceMin: '$550 MXN',
     priceRegular: '$650 MXN',
     priceHigh: '$590 MXN',
-    image: '/habitaciones/habitacion1.jpeg',
+    image: '/habitaciones/habitacion1.webp',
     beds: '1 Cama Matrimonial + 1 Individual',
     features: ['Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis', 'TV por cable']
   },
@@ -38,7 +38,7 @@ export const ROOMS_DATA: RoomDetail[] = [
     priceMin: '$590 MXN',
     priceRegular: '$750 MXN',
     priceHigh: '$690 MXN',
-    image: '/habitaciones/habitacion3.jpeg',
+    image: '/habitaciones/habitacion3.webp',
     beds: '2 Camas Matrimoniales',
     features: ['Espaciosa', 'Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis']
   },
@@ -50,7 +50,7 @@ export const ROOMS_DATA: RoomDetail[] = [
     priceMin: '$890 MXN',
     priceRegular: '$1,050 MXN',
     priceHigh: '$990 MXN',
-    image: '/habitaciones/habitacion5.jpeg',
+    image: '/habitaciones/habitacion5.webp',
     beds: '3 Camas Matrimoniales',
     features: ['Ideal familias/grupos', 'Baño privado', 'Agua caliente 24/7', 'Wi-Fi gratis']
   }
