@@ -30,7 +30,7 @@ export default function FeaturedSections() {
       priceMin: '$390 MXN',
       priceRegular: '$450 MXN',
       priceHigh: '$450 MXN',
-      image: '/habitaciones/habitacion2.jpeg',
+      image: '/habitaciones/habitacion2.webp',
     },
     {
       id: 2,
@@ -40,7 +40,7 @@ export default function FeaturedSections() {
       priceMin: '$550 MXN',
       priceRegular: '$650 MXN',
       priceHigh: '$590 MXN',
-      image: '/habitaciones/habitacion1.jpeg',
+      image: '/habitaciones/habitacion1.webp',
     },
     {
       id: 3,
@@ -50,7 +50,7 @@ export default function FeaturedSections() {
       priceMin: '$590 MXN',
       priceRegular: '$750 MXN',
       priceHigh: '$690 MXN',
-      image: '/habitaciones/habitacion3.jpeg',
+      image: '/habitaciones/habitacion3.webp',
     },
     {
       id: 4,
@@ -60,7 +60,7 @@ export default function FeaturedSections() {
       priceMin: '$890 MXN',
       priceRegular: '$1,050 MXN',
       priceHigh: '$990 MXN',
-      image: '/habitaciones/habitacion1.jpeg',
+      image: '/habitaciones/habitacion1.webp',
     },
   ];
 
@@ -68,25 +68,25 @@ export default function FeaturedSections() {
     {
       title: 'Aguas Termales',
       subtitle: 'Manantiales curativos',
-      image: '/aguas_termales.png',
+      image: '/aguas_termales.webp',
       alt: 'Aguas Termales de Chignahuapan Puebla cerca de Hotel Santa Fe',
     },
     {
       title: 'Kiosco Mudéjar',
       subtitle: 'Centro Histórico',
-      image: '/kiosco.png',
+      image: '/kiosco.webp',
       alt: 'Kiosco Mudéjar de madera en el centro de Chignahuapan Puebla',
     },
     {
       title: 'Feria de la Esfera',
       subtitle: 'Tradición y colorido',
-      image: '/esferas2.png',
+      image: '/esferas2.webp',
       alt: 'Esferas navideñas de vidrio soplado Chignahuapan Puebla',
     },
     {
       title: 'Basílica de la Inmaculada',
       subtitle: 'Joya arquitectónica',
-      image: '/basilica.png',
+      image: '/basilica.webp',
       alt: 'Basílica de la Inmaculada Concepción en Chignahuapan Puebla',
     },
   ];
