@@ -97,9 +97,7 @@ export default function Footer() {
       {/* SECCIÓN 4: COPYRIGHT Y LEGALES */}
       <section className="border-t border-[#c0a060]/20 py-4 px-4 text-center text-[11px] text-[#2d2926]/60 space-y-1">
         <p className="space-x-2">
-          <Link href="/terminos" className="hover:underline">Términos y Condiciones</Link>
-          <span>|</span>
-          <Link href="/privacidad" className="hover:underline">Política de Privacidad</Link>
+          <Link href="/terminos-y-condiciones" className="hover:underline">Términos y Condiciones</Link>
         </p>
         <p>
           © {year} Hotel Santa Fe Chignahuapan. Todos los derechos reservados.
