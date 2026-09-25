@@ -1,4 +1,3 @@
-import Header from '@/components/admin/Header';
 import MetricCard from '@/components/admin/dashboard/MetricCard';
 import ReservationsTable from '@/components/admin/dashboard/ReservationsTable';
 

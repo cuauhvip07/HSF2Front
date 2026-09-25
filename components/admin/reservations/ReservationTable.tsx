@@ -14,12 +14,16 @@ export interface Reservation {
 
 interface ReservationTableProps {
   reservations: Reservation[];
+  selectedDate?: string | null;
+  onClearDateFilter?: () => void;
   onView?: (reservation: Reservation) => void;
   onEdit?: (reservation: Reservation) => void;
 }
 
 export default function ReservationTable({
   reservations,
+  selectedDate,
+  onClearDateFilter,
   onView,
   onEdit,
 }: ReservationTableProps) {
@@ -40,10 +44,27 @@ export default function ReservationTable({
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-[#e5ded0] overflow-hidden">
-      <div className="p-6 border-b border-[#e5ded0]">
+      <div className="p-6 border-b border-[#e5ded0] flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-serif font-bold text-[#2d2926]">
           Reservaciones Recientes
         </h3>
+
+        {selectedDate && (
+          <div className="flex items-center gap-2 bg-[#f7f4ed] px-3 py-1 rounded-lg border border-[#e5ded0]">
+            <span className="text-xs text-[#5a524c]">
+              Filtrado por día: <strong className="text-[#2d2926]">{selectedDate}</strong>
+            </span>
+            {onClearDateFilter && (
+              <button
+                type="button"
+                onClick={onClearDateFilter}
+                className="text-xs text-[#d95d39] font-bold hover:underline ml-2"
+              >
+                ✕ Ver todas
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto">

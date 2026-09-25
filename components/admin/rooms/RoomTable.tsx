@@ -4,19 +4,20 @@ import Image from 'next/image';
 
 export interface Room {
   id: string;
-  image: string;
+  image?: string;
   number: string;
   type: string;
   capacity: string;
-  nightlyRate: string;
-  status: 'Disponible' | 'Ocupada' | 'Limpieza' | 'Mantenimiento';
-  housekeeping: 'Limpia' | 'Pendiente';
+  price: string; 
+  status: string; 
+  housekeeping: string; 
 }
 
 interface RoomTableProps {
   rooms: Room[];
   onView?: (room: Room) => void;
   onEdit?: (room: Room) => void;
+  onDelete?: (room: Room) => void; // <-- Agregado para resolver el error en RoomsClient
   onMaintenance?: (room: Room) => void;
 }
 
@@ -24,6 +25,7 @@ export default function RoomTable({
   rooms,
   onView,
   onEdit,
+  onDelete,
   onMaintenance,
 }: RoomTableProps) {
   const getStatusBadge = (status: Room['status']) => {
@@ -31,6 +33,7 @@ export default function RoomTable({
       case 'Disponible':
         return 'bg-[#d1fae5] text-[#065f46] border-[#a7f3d0]';
       case 'Ocupada':
+      case 'Reservada':
         return 'bg-[#fee2e2] text-[#991b1b] border-[#fca5a5]';
       case 'Limpieza':
         return 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]';
@@ -46,19 +49,8 @@ export default function RoomTable({
       {/* Header secundario de la tabla */}
       <div className="p-6 border-b border-[#e5ded0] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h3 className="text-lg font-serif font-bold text-[#2d2926]">
-          Recent Habitaciones
+          Listado de Habitaciones
         </h3>
-
-        <div className="flex items-center gap-2 text-xs text-[#5a524c]">
-          <span>Estado:</span>
-          <select className="bg-[#f7f4ed] border border-[#e5ded0] rounded-lg px-3 py-1.5 font-medium text-[#2d2926] focus:outline-none focus:border-[#c0a060]">
-            <option value="todos">Todos</option>
-            <option value="disponible">Disponible</option>
-            <option value="ocupada">Ocupada</option>
-            <option value="limpieza">Limpieza</option>
-            <option value="mantenimiento">Mantenimiento</option>
-          </select>
-        </div>
       </div>
 
       {/* Tabla de Habitaciones */}
@@ -92,12 +84,18 @@ export default function RoomTable({
                   </td>
                   <td className="py-3 px-4">
                     <div className="relative w-12 h-9 rounded-md overflow-hidden bg-gray-100 border border-[#e5ded0]">
-                      <Image
-                        src={room.image}
-                        alt={`Habitación ${room.number}`}
-                        fill
-                        className="object-cover"
-                      />
+                      {room.image ? (
+                        <Image
+                          src={room.image}
+                          alt={`Habitación ${room.number}`}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+                          Sin Foto
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="py-3 px-4 font-bold text-[#2d2926]">
@@ -106,7 +104,7 @@ export default function RoomTable({
                   <td className="py-3 px-4 font-medium">{room.type}</td>
                   <td className="py-3 px-4 text-xs text-[#5a524c]">{room.capacity}</td>
                   <td className="py-3 px-4 font-semibold text-[#2d2926]">
-                    {room.nightlyRate}
+                    {room.price}
                   </td>
                   <td className="py-3 px-4">
                     <span
@@ -118,43 +116,55 @@ export default function RoomTable({
                     </span>
                   </td>
                   <td className="py-3 px-4 text-xs font-medium">
-                    <span className={room.housekeeping === 'Limpia' ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-semibold'}>
+                    <span
+                      className={
+                        room.housekeeping === 'Limpia'
+                          ? 'text-emerald-700 font-semibold'
+                          : 'text-amber-700 font-semibold'
+                      }
+                    >
                       {room.housekeeping}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-center">
                     <div className="flex justify-center items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => onView?.(room)}
-                        className="p-1.5 text-[#5a524c] hover:text-[#c0a060] transition-colors rounded-lg hover:bg-[#f7f4ed]"
-                        title="Ver detalles"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onEdit?.(room)}
-                        className="p-1.5 text-[#5a524c] hover:text-[#2d2926] transition-colors rounded-lg hover:bg-[#f7f4ed]"
-                        title="Editar habitación"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onMaintenance?.(room)}
-                        className="p-1.5 text-[#5a524c] hover:text-[#d95d39] transition-colors rounded-lg hover:bg-[#f7f4ed]"
-                        title="Registrar mantenimiento / servicio"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        </svg>
-                      </button>
+                      {onView && (
+                        <button
+                          type="button"
+                          onClick={() => onView(room)}
+                          className="p-1.5 text-[#5a524c] hover:text-[#c0a060] transition-colors rounded-lg hover:bg-[#f7f4ed]"
+                          title="Ver detalles"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                      )}
+                      {onEdit && (
+                        <button
+                          type="button"
+                          onClick={() => onEdit(room)}
+                          className="p-1.5 text-[#5a524c] hover:text-[#2d2926] transition-colors rounded-lg hover:bg-[#f7f4ed]"
+                          title="Editar habitación"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={() => onDelete(room)}
+                          className="p-1.5 text-[#5a524c] hover:text-red-600 transition-colors rounded-lg hover:bg-[#f7f4ed]"
+                          title="Eliminar habitación"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -162,47 +172,6 @@ export default function RoomTable({
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Paginación */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#f7f4ed]/50 border-t border-[#e5ded0] text-xs text-[#5a524c]">
-        <span>Página 1 de 15</span>
-
-        <div className="flex items-center gap-1">
-          <button className="px-2.5 py-1 bg-white border border-[#e5ded0] rounded text-[#5a524c] hover:bg-[#e5ded0]">
-            &laquo;
-          </button>
-          <button className="px-3 py-1 bg-white border border-[#e5ded0] rounded text-[#5a524c] hover:bg-[#e5ded0]">
-            1
-          </button>
-          <button className="px-3 py-1 bg-[#d95d39] text-white rounded font-bold">
-            2
-          </button>
-          <button className="px-3 py-1 bg-white border border-[#e5ded0] rounded text-[#5a524c] hover:bg-[#e5ded0]">
-            3
-          </button>
-          <button className="px-3 py-1 bg-white border border-[#e5ded0] rounded text-[#5a524c] hover:bg-[#e5ded0]">
-            4
-          </button>
-          <button className="px-2.5 py-1 bg-white border border-[#e5ded0] rounded text-[#5a524c] hover:bg-[#e5ded0]">
-            &raquo;
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="px-3 py-1.5 bg-white border border-[#e5ded0] rounded-lg font-medium hover:bg-[#f7f4ed] transition-colors"
-          >
-            Anterior
-          </button>
-          <button
-            type="button"
-            className="px-3 py-1.5 bg-white border border-[#e5ded0] rounded-lg font-medium hover:bg-[#f7f4ed] transition-colors"
-          >
-            Siguiente
-          </button>
-        </div>
       </div>
     </div>
   );
