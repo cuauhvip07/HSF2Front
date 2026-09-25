@@ -11,19 +11,10 @@ interface AttractionCardProps {
 export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) => {
 
     // --- LÓGICA DE LAYOUT DINÁMICO (Estilo Libreto) ---
-
-    // 1. Estilo "Clima/Info": Texto sobre imagen completa (Similar a image_1.png)
     const isFullImageBackground = attraction.id === 'bienvenida-y-clima';
-
-    // 2. Estilo "Pueblo Mágico": Collage con imagen circular y recta (Similar a image_2.png)
     const isCollageLayout = attraction.category === 'Cultura & Historia' && attraction.id !== 'bienvenida-y-clima';
-
-    // 3. Estilo "Naturaleza": Dos imágenes cuadradas/rectas (Similar a image_4.png)
     const isNatureLayout = attraction.category === 'Naturaleza & Relax';
-
-    // 4. Estilo "Default/Experiencias": Imagen a sangre izquierda (image_6.png)
     const isDefaultLayout = !isFullImageBackground && !isCollageLayout && !isNatureLayout;
-
 
     // --- COMPONENTE DE TÍTULO Y DESCRIPCIÓN ---
     const TextContent = () => (
@@ -45,15 +36,12 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                     </p>
                 )}
 
-                <div className={`space-y-3 text-sm leading-relaxed ${isFullImageBackground ? 'text-[#e5ded0]' : 'text-[#5a524c]'}`}>
-
-                    <p className={`text-sm leading-relaxed ${isFullImageBackground ? 'text-[#e5ded0]' : 'text-[#5a524c]'}`}>
-                        {attraction.description}
-                    </p>
-                </div>
+                <p className={`text-sm leading-relaxed ${isFullImageBackground ? 'text-[#e5ded0]' : 'text-[#5a524c]'}`}>
+                    {attraction.description}
+                </p>
             </div>
 
-            {/* Recomendaciones / Tips (Solo si no es fondo completo para no saturar) */}
+            {/* Tips */}
             {!isFullImageBackground && attraction.tips && attraction.tips.length > 0 && (
                 <div className="mt-6 pt-4 border-t border-[#e5ded0] bg-[#f7f4ed] -mx-6 -mb-6 md:-mx-8 md:-mb-8 p-4 md:p-6 rounded-b-2xl">
                     <h4 className="text-xs font-bold uppercase text-[#2d2926] tracking-wide mb-2 flex items-center gap-2">
@@ -69,16 +57,12 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
         </div>
     );
 
-
     return (
         <article
             id={attraction.id}
-            className={`scroll-mt-28 bg-[#ffffff] border border-[#e5ded0] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 mb-8 relative`}
+            className="scroll-mt-28 bg-[#ffffff] border border-[#e5ded0] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 mb-8 relative"
         >
-
-            {/* --- RENDERIZADO CONDICIONAL DEL LAYOUT --- */}
-
-            {/* ESTILO 1: Fondo Completo (image_1.png) */}
+            {/* ESTILO 1: Fondo Completo */}
             {isFullImageBackground && (
                 <div className="relative min-h-[400px] flex items-center">
                     <Image
@@ -88,7 +72,6 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                         className="object-cover z-0"
                         sizes="100vw"
                     />
-                    {/* Overlay oscuro para legibilidad (Marrón Grafito al 60%) */}
                     <div className="absolute inset-0 bg-[#2d2926]/60 z-10" />
                     <div className="relative z-20 max-w-2xl">
                         <TextContent />
@@ -101,11 +84,10 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                 </div>
             )}
 
-            {/* ESTILO 2: Collage "Pueblo Mágico" (image_2.png) */}
+            {/* ESTILO 2: Collage "Pueblo Mágico" */}
             {isCollageLayout && (
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-center">
                     <div className="md:col-span-5 p-6 flex justify-center items-center relative">
-                        {/* Imagen Circular Principal (Kiosko/Palacio) */}
                         <div className="relative w-64 h-64 rounded-full overflow-hidden border-4 border-[#e5ded0] shadow-xl z-10">
                             <Image
                                 src={attraction.image}
@@ -115,7 +97,6 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                                 sizes="(max-width: 768px) 100vw, 30vw"
                             />
                         </div>
-                        {/* Decoración sutil (Círculo difuminado terracota) */}
                         <div className="absolute top-10 left-10 w-20 h-20 bg-[#d95d39]/10 rounded-full blur-2xl z-0" />
                     </div>
                     <div className="md:col-span-7">
@@ -124,25 +105,38 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                 </div>
             )}
 
-            {/* ESTILO 3: Naturaleza - Imágenes Rectas (image_4.png) */}
+            {/* ESTILO 3: Naturaleza */}
             {isNatureLayout && (
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
                     <div className="md:col-span-7">
                         <TextContent />
                     </div>
                     <div className="md:col-span-5 grid grid-cols-2 gap-2 p-2 bg-[#2d2926]">
-                        {/* Simulación de Collage de fotos de naturaleza */}
+                        {/* Foto 1: Imagen Principal */}
                         <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-[#e5ded0]/20">
-                            <Image src={attraction.image} alt="Naturaleza 1" fill className="object-cover" />
+                            <Image
+                                src={attraction.image}
+                                alt={`${attraction.title} 1`}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 50vw, 20vw"
+                            />
                         </div>
-                        <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-[#e5ded0]/20 mt-4"> {/* Desfase para estilo libreto */}
-                            <Image src={attraction.image} alt="Naturaleza 2" fill className="object-cover" />
+                        {/* Foto 2: Imagen Secundaria (independiente) */}
+                        <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-[#e5ded0]/20 mt-4">
+                            <Image
+                                src={attraction.secondaryImage || attraction.image}
+                                alt={`${attraction.title} 2`}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 50vw, 20vw"
+                            />
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* ESTILO 4: Default/Experiencias - Imagen a sangre (image_6.png) */}
+            {/* ESTILO 4: Default/Experiencias */}
             {isDefaultLayout && (
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
                     <div className="md:col-span-5 relative min-h-[260px] bg-[#2d2926]">
@@ -164,7 +158,6 @@ export const AttractionCard: React.FC<AttractionCardProps> = ({ attraction }) =>
                     </div>
                 </div>
             )}
-
         </article>
     );
 };
