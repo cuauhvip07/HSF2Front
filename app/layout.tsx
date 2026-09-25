@@ -6,12 +6,14 @@ const playfair = Playfair_Display({
   variable: "--font-serif",
   subsets: ["latin"],
   display: "swap",
+  preload: true,
 });
 
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -52,7 +54,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Datos estructurados Schema.org para Google (Rich Snippets)
   const hotelSchema = {
     "@context": "https://schema.org",
     "@type": "Hotel",
@@ -87,12 +88,16 @@ export default function RootLayout({
       className={`${playfair.variable} ${inter.variable} h-full antialiased font-sans`}
     >
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelSchema) }}
         />
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   );
 }

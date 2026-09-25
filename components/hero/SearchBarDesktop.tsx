@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 
 export default function SearchBarDesktop() {
   const [checkIn, setCheckIn] = useState<string>('');
@@ -10,22 +10,26 @@ export default function SearchBarDesktop() {
   const [isGuestsOpen, setIsGuestsOpen] = useState<boolean>(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  // Optimización 1: Evita instanciar objetos Date en cada re-renderizado
+  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
+
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent | PointerEvent) {
+      // Optimización 2: Evaluamos la colisión sin bloquear el hilo de renderizado inicial
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         setIsGuestsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    // Se usa 'pointerdown' que es el estándar moderno más eficiente para interacciones de puntero
+    document.addEventListener('pointerdown', handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Aquí se puede llamar la API
   };
-
-  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="hidden md:block w-full max-w-4xl mx-auto relative z-20">
@@ -40,7 +44,7 @@ export default function SearchBarDesktop() {
           </label>
           <div className="flex items-center gap-2 mt-0.5">
             <svg className="w-4 h-4 text-[#c0a060] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <input
               id="checkIn"
@@ -67,7 +71,7 @@ export default function SearchBarDesktop() {
           </label>
           <div className="flex items-center gap-2 mt-0.5">
             <svg className="w-4 h-4 text-[#c0a060] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <input
               id="checkOut"

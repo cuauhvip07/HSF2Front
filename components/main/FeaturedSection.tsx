@@ -3,17 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-interface Room {
-  id: number;
-  title: string;
-  capacity: string;
-  description: string;
-  priceMin: string;
-  priceRegular: string;
-  priceHigh: string;
-  image: string;
-}
+import { Room } from '@/types/room';
+import { BookingModal } from '@/components/user/rooms/BookingModal';
 
 export default function FeaturedSections() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -238,59 +229,13 @@ export default function FeaturedSections() {
 
       </div>
 
-      {/* MODAL EMERGENTE DE CONTACTO */}
-      {selectedRoom && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn"
-          onClick={() => setSelectedRoom(null)}
-        >
-          <div 
-            className="bg-[#f7f4ed] rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative border border-[#e5ded0]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Botón de cierre con área táctil cómoda (44x44px) */}
-            <button
-              type="button"
-              onClick={() => setSelectedRoom(null)}
-              aria-label="Cerrar ventana de contacto"
-              className="absolute top-3 right-4 text-[#988f86] hover:text-[#2d2926] text-xl font-bold cursor-pointer p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            >
-              ✕
-            </button>
-
-            <span className="text-[10px] font-bold text-[#c0a060] uppercase tracking-widest block">
-              {selectedRoom.capacity}
-            </span>
-
-            <h3 className="font-serif text-xl font-bold text-[#2d2926]">
-              {selectedRoom.title}
-            </h3>
-            
-            <p className="text-xs text-[#5a524c] leading-relaxed">
-              Para verificar disponibilidad y realizar tu reserva, ponte en contacto directo con recepción:
-            </p>
-
-            {/* Botones de acción directa para el pulgar en móviles */}
-            <div className="space-y-3 pt-2">
-              <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa solicitar una reserva para la ${selectedRoom.title} en Hotel Santa Fe Chignahuapan`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center min-h-[48px] w-full py-3.5 px-4 bg-[#25D366] text-white rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1ebd59] transition-colors shadow-sm active:scale-98"
-              >
-                Reservar por WhatsApp
-              </a>
-
-              <a
-                href={`tel:${PHONE_NUMBER}`}
-                className="flex items-center justify-center min-h-[48px] w-full py-3.5 px-4 border border-[#2d2926] text-[#2d2926] rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#2d2926] hover:text-white transition-colors active:scale-98"
-              >
-                Llamar por Teléfono
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* MODAL EMERGENTE DE CONTACTO REUTILIZABLE */}
+      <BookingModal
+        room={selectedRoom}
+        onClose={() => setSelectedRoom(null)}
+        phoneNumber={PHONE_NUMBER}
+        whatsappNumber={WHATSAPP_NUMBER}
+      />
     </section>
   );
 }
