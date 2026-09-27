@@ -98,6 +98,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelSchema) }}
         />
         {children}
+
+        <Analytics/>
       </body>
     </html>
   );
