@@ -1,7 +1,7 @@
 import ReservationsClient from '@/components/admin/reservations/ReservationClient';
 import { Reservation } from '@/components/admin/reservations/ReservationTable';
 
-// Mock temporal
+// Mock temporal con campos numéricos para adultos y niños
 const mockReservations: Reservation[] = [
   {
     id: 'RS-1092',
@@ -10,6 +10,8 @@ const mockReservations: Reservation[] = [
     roomType: 'Habitación Doble',
     checkIn: '2026-03-05',
     checkOut: '2026-03-08',
+    adults: 2,
+    children: 0,
     occupants: '2 Ad',
     amount: '$1,350 MXN',
     status: 'Confirmado',
@@ -21,6 +23,8 @@ const mockReservations: Reservation[] = [
     roomType: 'Habitación Triple Familiar',
     checkIn: '2026-03-12',
     checkOut: '2026-03-15',
+    adults: 4,
+    children: 2,
     occupants: '4 Ad, 2 Niñ',
     amount: '$3,150 MXN',
     status: 'Checked-in',
@@ -32,6 +36,8 @@ const mockReservations: Reservation[] = [
     roomType: 'Habitación Doble Sencilla',
     checkIn: '2026-03-15',
     checkOut: '2026-03-17',
+    adults: 2,
+    children: 1,
     occupants: '2 Ad, 1 Niñ',
     amount: '$1,300 MXN',
     status: 'Pendiente',
@@ -43,6 +49,8 @@ const mockReservations: Reservation[] = [
     roomType: 'Habitación Cuádruple',
     checkIn: '2026-03-20',
     checkOut: '2026-03-22',
+    adults: 4,
+    children: 0,
     occupants: '4 Ad',
     amount: '$1,500 MXN',
     status: 'Confirmado',

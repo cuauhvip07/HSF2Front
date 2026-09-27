@@ -7,7 +7,9 @@ export interface Reservation {
   roomType: string;
   checkIn: string;
   checkOut: string;
-  occupants: string;
+  adults: number;
+  children: number;
+  occupants?: string;
   amount: string;
   status: 'Confirmado' | 'Checked-in' | 'Pendiente' | 'Cancelado';
 }
@@ -40,6 +42,12 @@ export default function ReservationTable({
       default:
         return 'bg-[#f3f4f6] text-[#374151]';
     }
+  };
+
+  // Formateador de texto de ocupantes dinámico si occupants no existe
+  const renderOccupants = (res: Reservation) => {
+    if (res.occupants) return res.occupants;
+    return `${res.adults} Ad${res.children > 0 ? `, ${res.children} Niñ` : ''}`;
   };
 
   return (
@@ -102,7 +110,9 @@ export default function ReservationTable({
                   <td className="py-3.5 px-4 text-xs text-[#5a524c]">
                     {res.checkIn} - {res.checkOut}
                   </td>
-                  <td className="py-3.5 px-4 text-xs text-[#5a524c]">{res.occupants}</td>
+                  <td className="py-3.5 px-4 text-xs text-[#5a524c]">
+                    {renderOccupants(res)}
+                  </td>
                   <td className="py-3.5 px-4 font-semibold text-[#2d2926]">
                     {res.amount}
                   </td>
