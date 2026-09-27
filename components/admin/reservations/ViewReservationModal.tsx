@@ -100,8 +100,10 @@ export default function ViewReservationModal({
                 <p className="text-sm font-bold text-[#2d2926] mt-0.5">{reservation.guestName}</p>
               </div>
               <div>
-                <p className="text-[11px] text-[#5a524c] font-semibold">Correo Electrónico</p>
-                <p className="text-sm font-medium text-[#2d2926] mt-0.5">{reservation.guestEmail}</p>
+                <p className="text-[11px] text-[#5a524c] font-semibold">Teléfono de Contacto</p>
+                <p className="text-sm font-mono font-medium text-[#2d2926] mt-0.5">
+                  {reservation.guestPhone || 'Sin teléfono registrado'}
+                </p>
               </div>
             </div>
           </div>

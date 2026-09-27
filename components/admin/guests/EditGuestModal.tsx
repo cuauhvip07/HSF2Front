@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Guest } from './GuestTable';
-import SearchableSelect from '@/components/ui/SearchableSelect';
-import { mockCountries } from './guestData';
+import SearchableSelect, { Option } from '@/components/ui/SearchableSelect';
+import { mockCountries, mockGuests } from './guestData'; // 1. Importar mockGuests
 
 interface ExtendedGuest extends Guest {
   phoneCode?: string;
@@ -16,18 +16,17 @@ interface EditGuestModalProps {
   guest: ExtendedGuest | null;
   onClose: () => void;
   onSave: (updatedGuest: ExtendedGuest) => void;
+  existingGuests?: Guest[];
 }
 
 const guestTypes = ['Nuevo', 'Frecuente', 'VIP'];
 
-// Opciones de ladas formateadas
 const phoneCodeOptions = mockCountries.map((c) => ({
   id: c.id,
   label: `${c.code} (${c.name})`,
   value: c.code,
 }));
 
-// Opciones de países formateadas
 const countryOptions = mockCountries.map((c) => ({
   id: c.id,
   label: c.name,
@@ -39,6 +38,7 @@ export default function EditGuestModal({
   guest,
   onClose,
   onSave,
+  existingGuests = mockGuests, 
 }: EditGuestModalProps) {
   const {
     register,
@@ -70,6 +70,15 @@ export default function EditGuestModal({
   }, [isOpen]);
 
   if (!isOpen || !guest) return null;
+
+  // Generación dinámica de opciones de teléfono
+  const phoneSearchOptions: Option[] = existingGuests.map((g) => ({
+    id: g.id,
+    label: g.phone,
+    subLabel: `${g.name} (${g.email})`,
+    value: g.phone,
+    rawItem: g,
+  }));
 
   const onSubmit = (data: ExtendedGuest) => {
     onSave(data);
@@ -110,6 +119,11 @@ export default function EditGuestModal({
               {...register('name', { required: 'El nombre es obligatorio' })}
               className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
             />
+            {errors.name && (
+              <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
+                {errors.name.message}
+              </p>
+            )}
           </div>
 
           {/* Email */}
@@ -122,9 +136,14 @@ export default function EditGuestModal({
               {...register('email', { required: 'El correo es obligatorio' })}
               className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
             />
+            {errors.email && (
+              <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
-          {/* LADA Y TELÉFONO BÚSQUEDA */}
+          {/* LADA Y BÚSQUEDA DE TELÉFONO */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <Controller
@@ -146,13 +165,29 @@ export default function EditGuestModal({
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-[#5a524c] mb-1">
-                Número Telefónico <span className="text-[#d95d39]">*</span>
-              </label>
-              <input
-                type="text"
-                {...register('phone', { required: 'Teléfono obligatorio' })}
-                className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
+              <Controller
+                name="phone"
+                control={control}
+                rules={{ required: 'Teléfono obligatorio' }}
+                render={({ field }) => (
+                  <SearchableSelect
+                    label="Número Telefónico"
+                    placeholder="Escribe para buscar (ej. 901)..."
+                    options={phoneSearchOptions}
+                    value={field.value || ''}
+                    onChange={(val, selectedOption) => {
+                      field.onChange(val);
+                      // Auto-completar nombre y correo si se selecciona un registro del mock
+                      if (selectedOption?.rawItem) {
+                        const selectedGuest: Guest = selectedOption.rawItem;
+                        control._fields.name && control.register('name');
+                        control._fields.email && control.register('email');
+                      }
+                    }}
+                    error={errors.phone?.message}
+                    maxResults={3}
+                  />
+                )}
               />
             </div>
           </div>
@@ -170,13 +205,7 @@ export default function EditGuestModal({
                     placeholder="Escribe para buscar (ej. México)..."
                     options={countryOptions}
                     value={field.value || ''}
-                    onChange={(val, countryId) => {
-                      field.onChange(val);
-                      // Guardar id del país si está disponible
-                      if (countryId) {
-                        control._fields.countryId?._f && control.register('countryId');
-                      }
-                    }}
+                    onChange={(val) => field.onChange(val)}
                     error={errors.nationality?.message}
                     maxResults={5}
                   />

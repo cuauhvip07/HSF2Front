@@ -6,6 +6,48 @@ import ReservationTable, { Reservation } from '@/components/admin/reservations/R
 import ReservationCalendar from '@/components/admin/reservations/ReservationCalendar';
 import EditReservationModal from '@/components/admin/reservations/EditReservationModal';
 import ViewReservationModal from '@/components/admin/reservations/ViewReservationModal';
+import NewReservationModal from './NewReservationModal';
+import { Guest } from '@/components/admin/guests/GuestTable';
+
+// Mock de huéspedes para autocompletar en la creación de nuevas reservas
+const mockGuests: Guest[] = [
+  {
+    id: '121097',
+    name: 'Griselda Morales',
+    email: 'gris@gmail.com',
+    phone: '901-233-6770',
+    nationality: 'Chile',
+    lastReservation: '07/23 - 05/23',
+    type: 'Frecuente',
+    totalReservations: 3,
+    adults: 2,
+    children: 0,
+  },
+  {
+    id: '121092',
+    name: 'John Smith',
+    email: 'smith@mail.com',
+    phone: '901-235-6770',
+    nationality: 'Portugal',
+    lastReservation: '02/23 - 05/23',
+    type: 'Nuevo',
+    totalReservations: 2,
+    adults: 2,
+    children: 0,
+  },
+  {
+    id: '121093',
+    name: 'Carlos Ramírez',
+    email: 'carlos.ramirez@gmail.com',
+    phone: '901-235-6770',
+    nationality: 'México',
+    lastReservation: '02/23 - 05/23',
+    type: 'Nuevo',
+    totalReservations: 1,
+    adults: 4,
+    children: 2,
+  },
+];
 
 interface ReservationClientProps {
   initialReservations: Reservation[];
@@ -26,6 +68,9 @@ export default function ReservationClient({ initialReservations }: ReservationCl
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  // Estado para el modal de nueva reservación
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+
   const handleViewClick = (reservation: Reservation) => {
     setViewingReservation(reservation);
     setIsViewModalOpen(true);
@@ -42,11 +87,19 @@ export default function ReservationClient({ initialReservations }: ReservationCl
     );
   };
 
+  const handleCreateReservation = (newReservation: Reservation) => {
+    setReservations((prev) => [newReservation, ...prev]);
+  };
+
+  // Filtrado corregido con Optional Chaining y comprobaciones seguras
   const filteredReservations = reservations.filter((res) => {
+    const term = searchTerm.toLowerCase();
+
     const matchesSearch =
-      res.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      res.guestEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      res.id.toLowerCase().includes(searchTerm.toLowerCase());
+      res.guestName.toLowerCase().includes(term) ||
+      res.id.toLowerCase().includes(term) ||
+      (res.guestEmail ? res.guestEmail.toLowerCase().includes(term) : false) ||
+      (res.guestPhone ? res.guestPhone.includes(searchTerm) : false);
 
     const matchesStatus = selectedStatus === 'Todos' || res.status === selectedStatus;
 
@@ -99,6 +152,7 @@ export default function ReservationClient({ initialReservations }: ReservationCl
           setSelectedStatus={setSelectedStatus}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
+          onNewReservation={() => setIsNewModalOpen(true)}
         />
 
         {viewMode === 'calendar' ? (
@@ -141,6 +195,14 @@ export default function ReservationClient({ initialReservations }: ReservationCl
           setEditingReservation(null);
         }}
         onSave={handleSaveReservation}
+      />
+
+      {/* Modal de Nueva Reservación */}
+      <NewReservationModal
+        isOpen={isNewModalOpen}
+        onClose={() => setIsNewModalOpen(false)}
+        onSave={handleCreateReservation}
+        existingGuests={mockGuests}
       />
     </div>
   );
