@@ -3,7 +3,8 @@
 export interface Reservation {
   id: string;
   guestName: string;
-  guestEmail: string;
+  guestPhone?: string; // Teléfono para mostrar en la tabla en lugar del correo
+  guestEmail?: string;
   roomType: string;
   checkIn: string;
   checkOut: string;
@@ -104,7 +105,9 @@ export default function ReservationTable({
                   </td>
                   <td className="py-3.5 px-4">
                     <div className="font-semibold text-[#2d2926]">{res.guestName}</div>
-                    <div className="text-xs text-[#5a524c]">{res.guestEmail}</div>
+                    <div className="text-xs font-mono text-[#5a524c]">
+                      {res.guestPhone || 'Sin teléfono'}
+                    </div>
                   </td>
                   <td className="py-3.5 px-4 font-medium">{res.roomType}</td>
                   <td className="py-3.5 px-4 text-xs text-[#5a524c]">

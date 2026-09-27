@@ -9,6 +9,8 @@ export interface Guest {
   lastReservation: string;
   type: string; // Tipo flexible para evitar errores de type mismatch
   totalReservations: number;
+  adults?: number;   // Propiedad agregada para evitar errores de TypeScript
+  children?: number; // Propiedad agregada para evitar errores de TypeScript
 }
 
 interface GuestTableProps {

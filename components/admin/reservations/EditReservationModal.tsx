@@ -35,7 +35,7 @@ export default function EditReservationModal({
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<Reservation>();
 
   useEffect(() => {
@@ -44,7 +44,6 @@ export default function EditReservationModal({
     }
   }, [reservation, reset]);
 
-  // Bloquear / Desbloquear Scroll del body
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -60,7 +59,6 @@ export default function EditReservationModal({
   if (!isOpen || !reservation) return null;
 
   const onSubmit = (data: Reservation) => {
-    // Generar la cadena formateada de ocupantes para la vista de tabla
     const formattedOccupants = `${data.adults} Ad${
       data.children > 0 ? `, ${data.children} Niñ` : ''
     }`;
@@ -79,7 +77,6 @@ export default function EditReservationModal({
       <div className="fixed inset-0" onClick={onClose} />
 
       <div className="relative bg-white rounded-2xl shadow-xl border border-[#e5ded0] w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col z-10">
-        {/* Encabezado */}
         <div className="p-6 border-b border-[#e5ded0] flex items-center justify-between sticky top-0 bg-white z-20">
           <div>
             <span className="text-xs font-mono font-bold text-[#c0a060] uppercase tracking-wider">
@@ -94,58 +91,36 @@ export default function EditReservationModal({
             onClick={onClose}
             className="p-2 text-[#5a524c] hover:text-[#2d2926] hover:bg-[#f7f4ed] rounded-lg transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            ✕
           </button>
         </div>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 flex flex-col gap-5">
-          {/* Datos del Huésped */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* INFORMACIÓN DEL HUÉSPED BLOQUEADA PARA EDICIÓN */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#f7f4ed]/60 p-4 rounded-xl border border-[#e5ded0]">
             <div>
               <label className="block text-xs font-semibold text-[#5a524c] mb-1">
-                Nombre del Huésped <span className="text-[#d95d39]">*</span>
+                Nombre del Huésped (Solo lectura)
               </label>
               <input
                 type="text"
-                {...register('guestName', {
-                  required: 'El nombre del huésped es obligatorio',
-                })}
-                className={`w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border rounded-xl text-sm text-[#2d2926] focus:outline-none transition-colors ${
-                  errors.guestName ? 'border-[#d95d39]' : 'border-[#e5ded0] focus:border-[#c0a060]'
-                }`}
+                {...register('guestName')}
+                disabled
+                className="w-full px-3.5 py-2.5 bg-white/70 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#5a524c] cursor-not-allowed"
               />
-              {errors.guestName && (
-                <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
-                  {errors.guestName.message}
-                </p>
-              )}
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-[#5a524c] mb-1">
-                Correo Electrónico <span className="text-[#d95d39]">*</span>
+                Teléfono de Contacto (Solo lectura)
               </label>
               <input
-                type="email"
-                {...register('guestEmail', {
-                  required: 'El correo electrónico es obligatorio',
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Correo inválido',
-                  },
-                })}
-                className={`w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border rounded-xl text-sm text-[#2d2926] focus:outline-none transition-colors ${
-                  errors.guestEmail ? 'border-[#d95d39]' : 'border-[#e5ded0] focus:border-[#c0a060]'
-                }`}
+                type="text"
+                {...register('guestPhone')}
+                disabled
+                placeholder="Sin teléfono registrado"
+                className="w-full px-3.5 py-2.5 bg-white/70 border border-[#e5ded0] rounded-xl text-sm font-mono text-[#5a524c] cursor-not-allowed"
               />
-              {errors.guestEmail && (
-                <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
-                  {errors.guestEmail.message}
-                </p>
-              )}
             </div>
           </div>
 
@@ -209,31 +184,22 @@ export default function EditReservationModal({
             </div>
           </div>
 
-          {/* SELECCIÓN DE ADULTOS Y NIÑOS (VALORES NUMÉRICOS) */}
+          {/* Ocupantes y Monto */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#5a524c] mb-1">
                 Adultos <span className="text-[#d95d39]">*</span>
               </label>
               <select
-                {...register('adults', {
-                  required: 'Selecciona cantidad de adultos',
-                  valueAsNumber: true,
-                  min: { value: 1, message: 'Mínimo 1 adulto' },
-                })}
+                {...register('adults', { valueAsNumber: true })}
                 className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
               >
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                {[1, 2, 3, 4, 5, 6].map((num) => (
                   <option key={num} value={num}>
                     {num} {num === 1 ? 'Adulto' : 'Adultos'}
                   </option>
                 ))}
               </select>
-              {errors.adults && (
-                <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
-                  {errors.adults.message}
-                </p>
-              )}
             </div>
 
             <div>
@@ -241,12 +207,10 @@ export default function EditReservationModal({
                 Niños
               </label>
               <select
-                {...register('children', {
-                  valueAsNumber: true,
-                })}
+                {...register('children', { valueAsNumber: true })}
                 className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
               >
-                {[0, 1, 2, 3, 4, 5].map((num) => (
+                {[0, 1, 2, 3, 4].map((num) => (
                   <option key={num} value={num}>
                     {num} {num === 1 ? 'Niño' : 'Niños'}
                   </option>
@@ -264,15 +228,10 @@ export default function EditReservationModal({
                 {...register('amount', { required: 'El monto total es obligatorio' })}
                 className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
               />
-              {errors.amount && (
-                <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
-                  {errors.amount.message}
-                </p>
-              )}
             </div>
           </div>
 
-          {/* Botones */}
+          {/* Botones de Acción */}
           <div className="flex items-center justify-end gap-3 border-t border-[#e5ded0] pt-5 mt-2">
             <button
               type="button"
