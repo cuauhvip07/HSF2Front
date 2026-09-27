@@ -3,16 +3,49 @@
 import { useState } from 'react';
 import GuestFilters from '@/components/admin/guests/GuestFilters';
 import GuestTable, { Guest } from '@/components/admin/guests/GuestTable';
+import EditGuestModal from '@/components/admin/guests/EditGuestModal';
 
 interface GuestsClientProps {
   initialGuests: Guest[];
 }
 
 export default function GuestsClient({ initialGuests }: GuestsClientProps) {
+  const [guests, setGuests] = useState<Guest[]>(initialGuests);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('Todos');
 
-  const filteredGuests = initialGuests.filter((guest) => {
+  // Estado para el modal de edición
+  const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Abrir modal de edición al presionar el lápiz
+  const handleEditClick = (guest: Guest) => {
+    setEditingGuest(guest);
+    setIsEditModalOpen(true);
+  };
+
+  // Guardar los cambios del huésped editado
+  const handleSaveGuest = (updatedGuest: Guest) => {
+    setGuests((prev) =>
+      prev.map((item) => (item.id === updatedGuest.id ? updatedGuest : item))
+    );
+
+    // Preparado para conexión futura con la API:
+    /*
+    try {
+      await fetch(`/api/admin/guests/${updatedGuest.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedGuest),
+      });
+    } catch (error) {
+      console.error('Error al guardar el huésped:', error);
+    }
+    */
+  };
+
+  // Filtrado de la lista
+  const filteredGuests = guests.filter((guest) => {
     const matchesSearch =
       guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       guest.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -48,10 +81,21 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
         <GuestTable
           guests={filteredGuests}
           onView={(guest) => alert(`Ver información de ${guest.name}`)}
-          onEdit={(guest) => alert(`Editar cliente ID: ${guest.id}`)}
+          onEdit={handleEditClick}
           onHistory={(guest) => alert(`Ver historial de ${guest.name}`)}
         />
       </main>
+
+      {/* Modal de Edición de Huésped */}
+      <EditGuestModal
+        isOpen={isEditModalOpen}
+        guest={editingGuest}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingGuest(null);
+        }}
+        onSave={handleSaveGuest}
+      />
     </div>
   );
 }
