@@ -20,6 +20,11 @@ export default function RoomCard({ room, onOpenDetails }: RoomCardProps) {
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
+
+        {/* Etiqueta Flotante de Capacidad */}
+        <div className="absolute top-3 right-3 bg-[#3d332a]/80 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-md tracking-wider uppercase">
+          {room.capacity} {room.capacity === 1 ? 'PERSONA' : 'PERSONAS'}
+        </div>
       </div>
 
       {/* Título */}
@@ -37,7 +42,7 @@ export default function RoomCard({ room, onOpenDetails }: RoomCardProps) {
         Desde <span className="font-bold">${room.pricePerNight.toLocaleString('es-MX')} MXN</span> / noche.
       </p>
 
-      {/* Botón Ver Detalles que activa el Modal */}
+      {/* Botón Ver Detalles */}
       <button
         onClick={() => onOpenDetails(room)}
         className="border border-[#c0a060] text-[#c0a060] hover:bg-[#c0a060] hover:text-white transition-all duration-300 text-xs font-semibold uppercase tracking-widest px-8 py-2.5 rounded-full"
