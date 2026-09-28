@@ -4,6 +4,9 @@ import { useState } from 'react';
 import GuestFilters from '@/components/admin/guests/GuestFilters';
 import GuestTable, { Guest } from '@/components/admin/guests/GuestTable';
 import EditGuestModal from '@/components/admin/guests/EditGuestModal';
+import ViewGuestModal from '@/components/admin/guests/ViewGuestModal';
+import NewGuestModal from '@/components/admin/guests/NewGuestModal';
+import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 
 interface GuestsClientProps {
   initialGuests: Guest[];
@@ -12,51 +15,107 @@ interface GuestsClientProps {
 export default function GuestsClient({ initialGuests }: GuestsClientProps) {
   const [guests, setGuests] = useState<Guest[]>(initialGuests);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('Todos');
 
-  // Estado para el modal de edición
+  // Selección Múltiple de IDs
+  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Modales
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+
+  const [viewingGuest, setViewingGuest] = useState<Guest | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Abrir modal de edición al presionar el lápiz
+  // Modal para eliminar (Soporta individual y masivo)
+  const [deletingGuest, setDeletingGuest] = useState<Guest | null>(null);
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Handlers para Selección de Checkboxes
+  const handleSelectGuest = (id: string) => {
+    setSelectedGuestIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllPage = (visibleIds: string[]) => {
+    const allSelected = visibleIds.every((id) => selectedGuestIds.includes(id));
+    if (allSelected) {
+      setSelectedGuestIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setSelectedGuestIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
+
+  // Apertura de Modales
+  const handleViewClick = (guest: Guest) => {
+    setViewingGuest(guest);
+    setIsViewModalOpen(true);
+  };
+
   const handleEditClick = (guest: Guest) => {
     setEditingGuest(guest);
     setIsEditModalOpen(true);
   };
 
-  // Guardar los cambios del huésped editado
+  const handleDeleteSingle = (guest: Guest) => {
+    setDeletingGuest(guest);
+    setIsBulkDelete(false);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteBulk = () => {
+    setIsBulkDelete(true);
+    setDeletingGuest(null);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Confirmar Eliminación (Individual o Masiva)
+  const handleConfirmDelete = () => {
+    if (isBulkDelete) {
+      setGuests((prev) => prev.filter((g) => !selectedGuestIds.includes(g.id)));
+      setSelectedGuestIds([]);
+    } else if (deletingGuest) {
+      setGuests((prev) => prev.filter((g) => g.id !== deletingGuest.id));
+      setSelectedGuestIds((prev) => prev.filter((id) => id !== deletingGuest.id));
+    }
+    setIsDeleteModalOpen(false);
+    setDeletingGuest(null);
+    setIsBulkDelete(false);
+  };
+
+  const handleCreateGuest = (newGuest: Guest) => {
+    setGuests((prev) => [newGuest, ...prev]);
+  };
+
   const handleSaveGuest = (updatedGuest: Guest) => {
     setGuests((prev) =>
       prev.map((item) => (item.id === updatedGuest.id ? updatedGuest : item))
     );
-
-    // Preparado para conexión futura con la API:
-    /*
-    try {
-      await fetch(`/api/admin/guests/${updatedGuest.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedGuest),
-      });
-    } catch (error) {
-      console.error('Error al guardar el huésped:', error);
-    }
-    */
   };
 
-  // Filtrado de la lista
+  // Lógica de Búsqueda y Paginación
   const filteredGuests = guests.filter((guest) => {
-    const matchesSearch =
-      guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guest.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const term = searchTerm.toLowerCase();
+    return (
+      guest.name.toLowerCase().includes(term) ||
+      guest.email.toLowerCase().includes(term) ||
       guest.phone.includes(searchTerm) ||
-      guest.id.includes(searchTerm);
-
-    const matchesFilter =
-      selectedFilter === 'Todos' || guest.type === selectedFilter;
-
-    return matchesSearch && matchesFilter;
+      guest.id.includes(searchTerm)
+    );
   });
+
+  const totalPages = Math.ceil(filteredGuests.length / itemsPerPage) || 1;
+  const paginatedGuests = filteredGuests.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="flex-1 flex flex-col bg-[#f7f4ed]/40 min-h-screen">
@@ -66,35 +125,110 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
             Gestión de Huéspedes
           </h2>
           <p className="text-xs text-[#5a524c] mt-1">
-            Visualiza y administra el historial de tus clientes
+            Visualiza, registra y administra el historial de tus clientes
           </p>
         </div>
 
+        {/* Filtros + Eliminación Masiva */}
         <GuestFilters
           searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedFilter={selectedFilter}
-          setSelectedFilter={setSelectedFilter}
-          onNewGuest={() => alert('Abrir modal para agregar nuevo huésped')}
+          setSearchTerm={(term) => {
+            setSearchTerm(term);
+            setCurrentPage(1);
+          }}
+          itemsPerPage={itemsPerPage}
+          setItemsPerPage={(size) => {
+            setItemsPerPage(size);
+            setCurrentPage(1);
+          }}
+          selectedCount={selectedGuestIds.length}
+          onDeleteSelected={handleDeleteBulk}
+          onNewGuest={() => setIsNewModalOpen(true)}
         />
 
+        {/* Tabla Paginada con Checkboxes */}
         <GuestTable
-          guests={filteredGuests}
-          onView={(guest) => alert(`Ver información de ${guest.name}`)}
+          guests={paginatedGuests}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          selectedGuestIds={selectedGuestIds}
+          onSelectGuest={handleSelectGuest}
+          onSelectAllPage={handleSelectAllPage}
+          onPageChange={(page) => setCurrentPage(page)}
+          onView={handleViewClick}
           onEdit={handleEditClick}
-          onHistory={(guest) => alert(`Ver historial de ${guest.name}`)}
+          onHistory={handleViewClick}
+          onDelete={handleDeleteSingle}
         />
       </main>
 
-      {/* Modal de Edición de Huésped */}
+      {/* Modal Nuevo Huésped */}
+      <NewGuestModal
+        isOpen={isNewModalOpen}
+        onClose={() => setIsNewModalOpen(false)}
+        onSave={handleCreateGuest}
+        existingGuests={guests}
+      />
+
+      {/* Modal Ver Detalle */}
+      <ViewGuestModal
+        isOpen={isViewModalOpen}
+        guest={viewingGuest}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setViewingGuest(null);
+        }}
+        onEditClick={handleEditClick}
+      />
+
+      {/* Modal Editar Huésped */}
       <EditGuestModal
         isOpen={isEditModalOpen}
         guest={editingGuest}
+        existingGuests={guests}
         onClose={() => {
           setIsEditModalOpen(false);
           setEditingGuest(null);
         }}
         onSave={handleSaveGuest}
+      />
+
+      {/* Modal Reutilizable de Confirmación de Eliminación */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        itemName={
+          isBulkDelete
+            ? `${selectedGuestIds.length} huéspedes seleccionados`
+            : deletingGuest
+            ? `al huésped ${deletingGuest.name}`
+            : undefined
+        }
+        description={
+          isBulkDelete
+            ? `¿Estás seguro de que deseas eliminar permanentemente a estos ${selectedGuestIds.length} huéspedes?`
+            : 'Se eliminará este perfil. Las reservaciones pasadas asociadas se mantendrán archivadas.'
+        }
+        itemDetails={
+          !isBulkDelete && deletingGuest ? (
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Correo:</span>
+                <span className="font-semibold">{deletingGuest.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Teléfono:</span>
+                <span className="font-mono font-semibold">{deletingGuest.phone}</span>
+              </div>
+            </div>
+          ) : null
+        }
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeletingGuest(null);
+          setIsBulkDelete(false);
+        }}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

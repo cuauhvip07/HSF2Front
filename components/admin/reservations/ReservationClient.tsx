@@ -7,9 +7,9 @@ import ReservationCalendar from '@/components/admin/reservations/ReservationCale
 import EditReservationModal from '@/components/admin/reservations/EditReservationModal';
 import ViewReservationModal from '@/components/admin/reservations/ViewReservationModal';
 import NewReservationModal from './NewReservationModal';
+import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import { Guest } from '@/components/admin/guests/GuestTable';
 
-// Mock de huéspedes para autocompletar en la creación de nuevas reservas
 const mockGuests: Guest[] = [
   {
     id: '121097',
@@ -18,7 +18,6 @@ const mockGuests: Guest[] = [
     phone: '901-233-6770',
     nationality: 'Chile',
     lastReservation: '07/23 - 05/23',
-    type: 'Frecuente',
     totalReservations: 3,
     adults: 2,
     children: 0,
@@ -30,7 +29,6 @@ const mockGuests: Guest[] = [
     phone: '901-235-6770',
     nationality: 'Portugal',
     lastReservation: '02/23 - 05/23',
-    type: 'Nuevo',
     totalReservations: 2,
     adults: 2,
     children: 0,
@@ -42,7 +40,6 @@ const mockGuests: Guest[] = [
     phone: '901-235-6770',
     nationality: 'México',
     lastReservation: '02/23 - 05/23',
-    type: 'Nuevo',
     totalReservations: 1,
     adults: 4,
     children: 2,
@@ -60,16 +57,42 @@ export default function ReservationClient({ initialReservations }: ReservationCl
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
 
-  // Estado para el modal de visualización
+  // Selección múltiple
+  const [selectedReservationIds, setSelectedReservationIds] = useState<string[]>([]);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Modales
   const [viewingReservation, setViewingReservation] = useState<Reservation | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  // Estado para el modal de edición
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Estado para el modal de nueva reservación
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+
+  // Modales de Eliminación
+  const [deletingReservation, setDeletingReservation] = useState<Reservation | null>(null);
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Selección Handlers
+  const handleSelectReservation = (id: string) => {
+    setSelectedReservationIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllPage = (visibleIds: string[]) => {
+    const allSelected = visibleIds.every((id) => selectedReservationIds.includes(id));
+    if (allSelected) {
+      setSelectedReservationIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setSelectedReservationIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
 
   const handleViewClick = (reservation: Reservation) => {
     setViewingReservation(reservation);
@@ -79,6 +102,31 @@ export default function ReservationClient({ initialReservations }: ReservationCl
   const handleEditClick = (reservation: Reservation) => {
     setEditingReservation(reservation);
     setIsEditModalOpen(true);
+  };
+
+  const handleDeleteSingle = (reservation: Reservation) => {
+    setDeletingReservation(reservation);
+    setIsBulkDelete(false);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteBulk = () => {
+    setIsBulkDelete(true);
+    setDeletingReservation(null);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (isBulkDelete) {
+      setReservations((prev) => prev.filter((r) => !selectedReservationIds.includes(r.id)));
+      setSelectedReservationIds([]);
+    } else if (deletingReservation) {
+      setReservations((prev) => prev.filter((item) => item.id !== deletingReservation.id));
+      setSelectedReservationIds((prev) => prev.filter((id) => id !== deletingReservation.id));
+    }
+    setIsDeleteModalOpen(false);
+    setDeletingReservation(null);
+    setIsBulkDelete(false);
   };
 
   const handleSaveReservation = (updatedReservation: Reservation) => {
@@ -91,7 +139,7 @@ export default function ReservationClient({ initialReservations }: ReservationCl
     setReservations((prev) => [newReservation, ...prev]);
   };
 
-  // Filtrado corregido con Optional Chaining y comprobaciones seguras
+  // Filtrado + Paginación
   const filteredReservations = reservations.filter((res) => {
     const term = searchTerm.toLowerCase();
 
@@ -109,6 +157,12 @@ export default function ReservationClient({ initialReservations }: ReservationCl
 
     return matchesSearch && matchesStatus && matchesDate;
   });
+
+  const totalPages = Math.ceil(filteredReservations.length / itemsPerPage) || 1;
+  const paginatedReservations = filteredReservations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="flex-1 flex flex-col bg-[#f7f4ed]/40 min-h-screen">
@@ -147,11 +201,27 @@ export default function ReservationClient({ initialReservations }: ReservationCl
 
         <ReservationFilters
           searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
+          setSearchTerm={(term) => {
+            setSearchTerm(term);
+            setCurrentPage(1);
+          }}
           selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
+          setSelectedStatus={(status) => {
+            setSelectedStatus(status);
+            setCurrentPage(1);
+          }}
           selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
+          setSelectedDate={(date) => {
+            setSelectedDate(date);
+            setCurrentPage(1);
+          }}
+          itemsPerPage={itemsPerPage}
+          setItemsPerPage={(pageSize) => {
+            setItemsPerPage(pageSize);
+            setCurrentPage(1);
+          }}
+          selectedCount={selectedReservationIds.length}
+          onDeleteSelected={handleDeleteBulk}
           onNewReservation={() => setIsNewModalOpen(true)}
         />
 
@@ -166,11 +236,19 @@ export default function ReservationClient({ initialReservations }: ReservationCl
           />
         ) : (
           <ReservationTable
-            reservations={filteredReservations}
+            reservations={paginatedReservations}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            selectedReservationIds={selectedReservationIds}
+            onSelectReservation={handleSelectReservation}
+            onSelectAllPage={handleSelectAllPage}
+            onPageChange={(page) => setCurrentPage(page)}
             selectedDate={selectedDate}
             onClearDateFilter={() => setSelectedDate(null)}
             onView={handleViewClick}
             onEdit={handleEditClick}
+            onDelete={handleDeleteSingle}
           />
         )}
       </main>
@@ -203,6 +281,47 @@ export default function ReservationClient({ initialReservations }: ReservationCl
         onClose={() => setIsNewModalOpen(false)}
         onSave={handleCreateReservation}
         existingGuests={mockGuests}
+      />
+
+      {/* Modal Reutilizable de Confirmación de Eliminación */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        itemName={
+          isBulkDelete
+            ? `${selectedReservationIds.length} reservaciones seleccionadas`
+            : deletingReservation
+            ? `Folio N° ${deletingReservation.id}`
+            : undefined
+        }
+        description={
+          isBulkDelete
+            ? `¿Estás seguro de que deseas cancelar/eliminar permanentemente estas ${selectedReservationIds.length} reservaciones?`
+            : 'Esta reservación será eliminada permanentemente del sistema.'
+        }
+        itemDetails={
+          !isBulkDelete && deletingReservation ? (
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Huésped:</span>
+                <span className="font-semibold">{deletingReservation.guestName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Habitación:</span>
+                <span className="font-semibold">{deletingReservation.roomType}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Monto Total:</span>
+                <span className="font-semibold">{deletingReservation.amount}</span>
+              </div>
+            </div>
+          ) : null
+        }
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeletingReservation(null);
+          setIsBulkDelete(false);
+        }}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );
