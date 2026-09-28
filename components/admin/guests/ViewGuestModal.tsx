@@ -54,19 +54,6 @@ export default function ViewGuestModal({
 
   if (!isOpen || !guest) return null;
 
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case 'Frecuente':
-        return 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]';
-      case 'Nuevo':
-        return 'bg-[#dbeafe] text-[#1e40af] border-[#bfdbfe]';
-      case 'VIP':
-        return 'bg-[#fce7f3] text-[#9d174d] border-[#fbcfe8]';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2d2926]/60 backdrop-blur-sm animate-fade-in">
       <div className="fixed inset-0" onClick={onClose} />
@@ -97,15 +84,11 @@ export default function ViewGuestModal({
           <div className="flex items-center justify-between bg-[#f7f4ed] p-4 rounded-xl border border-[#e5ded0]">
             <div>
               <p className="text-xs text-[#5a524c] uppercase font-bold tracking-wider">
-                Categoría de Cliente
+                Estado del Perfil
               </p>
-              <span
-                className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold border ${getTypeBadge(
-                  guest.type
-                )}`}
-              >
-                {guest.type}
-              </span>
+              <p className="text-sm font-semibold text-[#2d2926] mt-0.5">
+                Cliente Registrado
+              </p>
             </div>
             <div className="text-right">
               <p className="text-xs text-[#5a524c] uppercase font-bold tracking-wider">

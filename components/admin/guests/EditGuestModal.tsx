@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Guest } from './GuestTable';
 import SearchableSelect, { Option } from '@/components/ui/SearchableSelect';
-import { mockCountries, mockGuests } from './guestData'; // 1. Importar mockGuests
+import { mockCountries, mockGuests } from './guestData';
 
 interface ExtendedGuest extends Guest {
   phoneCode?: string;
@@ -18,8 +18,6 @@ interface EditGuestModalProps {
   onSave: (updatedGuest: ExtendedGuest) => void;
   existingGuests?: Guest[];
 }
-
-const guestTypes = ['Nuevo', 'Frecuente', 'VIP'];
 
 const phoneCodeOptions = mockCountries.map((c) => ({
   id: c.id,
@@ -193,41 +191,23 @@ export default function EditGuestModal({
           </div>
 
           {/* NACIONALIDAD AUTOCOMPLETADO */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Controller
-                name="nationality"
-                control={control}
-                rules={{ required: 'La nacionalidad es obligatoria' }}
-                render={({ field }) => (
-                  <SearchableSelect
-                    label="Nacionalidad"
-                    placeholder="Escribe para buscar (ej. México)..."
-                    options={countryOptions}
-                    value={field.value || ''}
-                    onChange={(val) => field.onChange(val)}
-                    error={errors.nationality?.message}
-                    maxResults={5}
-                  />
-                )}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#5a524c] mb-1">
-                Tipo de Huésped <span className="text-[#d95d39]">*</span>
-              </label>
-              <select
-                {...register('type', { required: 'Selecciona una categoría' })}
-                className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
-              >
-                {guestTypes.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <Controller
+              name="nationality"
+              control={control}
+              rules={{ required: 'La nacionalidad es obligatoria' }}
+              render={({ field }) => (
+                <SearchableSelect
+                  label="Nacionalidad"
+                  placeholder="Escribe para buscar (ej. México)..."
+                  options={countryOptions}
+                  value={field.value || ''}
+                  onChange={(val) => field.onChange(val)}
+                  error={errors.nationality?.message}
+                  maxResults={5}
+                />
+              )}
+            />
           </div>
 
           {/* Botones de Acción */}
