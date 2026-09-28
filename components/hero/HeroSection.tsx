@@ -11,7 +11,7 @@ export default function HeroSection() {
       {/* Fondo de la Imagen sin paddings ni márgenes arriba */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/image-hero.png"
+          src="/image-hero.webp"
           alt="Fondo Hotel Santa Fe Chignahuapan"
           fill
           priority

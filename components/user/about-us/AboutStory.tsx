@@ -15,7 +15,7 @@ export const AboutStory: React.FC = () => {
             {/* Imagen Principal */}
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border-4 border-[#ffffff] shadow-lg bg-[#2d2926]">
               <Image
-                src="/inside.png" 
+                src="/inside.webp" 
                 alt="Hotel Santa Fe Chignahuapan"
                 fill
                 className="object-cover"
@@ -26,7 +26,7 @@ export const AboutStory: React.FC = () => {
             
             <div className="absolute -bottom-8 -right-4 md:-right-6 w-3/5 aspect-[4/3] rounded-2xl overflow-hidden border-4 border-[#ffffff] shadow-2xl bg-[#2d2926] hidden sm:block">
               <Image
-                src="/habitaciones/habitacion2.jpeg" 
+                src="/habitaciones/habitacion2.webp" 
                 alt="Detalle de instalaciones"
                 fill
                 className="object-cover"

@@ -7,37 +7,50 @@ import { EventsCalendar } from '@/components/tourist_guide/EventsCalendar';
 import { ATTRACTIONS_DATA } from '@/components/tourist_guide/guideData';
 
 export default function TouristGuidePage() {
-  const [activeId, setActiveId] = useState<string>(ATTRACTIONS_DATA[0].id);
+  const [activeId, setActiveId] = useState<string>(
+    ATTRACTIONS_DATA.length > 0 ? ATTRACTIONS_DATA[0].id : ''
+  );
 
   const handleSelectAttraction = (id: string) => {
     setActiveId(id);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    // Optimización 1: Evita el reflow forzado al diferir el desplazamiento al siguiente cuadro
+    requestAnimationFrame(() => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-20% 0px -60% 0px' }
-    );
+    let observer: IntersectionObserver | null = null;
 
-    ATTRACTIONS_DATA.forEach((item) => {
-      const el = document.getElementById(item.id);
-      if (el) observer.observe(el);
-    });
+    // Optimización 2: Se difiere la consulta al DOM para no interrumpir la pintura inicial
+    const timer = setTimeout(() => {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveId(entry.target.id);
+            }
+          });
+        },
+        { rootMargin: '-20% 0px -60% 0px' }
+      );
 
-    const calendarEl = document.getElementById('calendario-eventos');
-    if (calendarEl) observer.observe(calendarEl);
+      ATTRACTIONS_DATA.forEach((item) => {
+        const el = document.getElementById(item.id);
+        if (el && observer) observer.observe(el);
+      });
 
-    return () => observer.disconnect();
+      const calendarEl = document.getElementById('calendario-eventos');
+      if (calendarEl && observer) observer.observe(calendarEl);
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+      if (observer) observer.disconnect();
+    };
   }, []);
 
   return (
@@ -62,8 +75,12 @@ export default function TouristGuidePage() {
 
           <div className="flex-1 w-full space-y-2">
             {/* Tarjetas de atractivos en formato Libreto Dinámico */}
-            {ATTRACTIONS_DATA.map((attraction) => (
-              <AttractionCard key={attraction.id} attraction={attraction} />
+            {ATTRACTIONS_DATA.map((attraction, index) => (
+              <AttractionCard 
+                key={attraction.id} 
+                attraction={attraction} 
+                isFirstCard={index === 0}
+              />
             ))}
 
             {/* Calendario de Eventos */}
@@ -78,7 +95,7 @@ export default function TouristGuidePage() {
                 Cualquier duda sobre algún atractivo, lugar para comer o transporte, acude a la recepción del Hotel Santa Fe. ¡Estamos para servirte 24/7!
               </p>
               <a
-                href="https://wa.me/527971000000" // Ajustar con el número real de WhatsApp
+                href="https://wa.me/527971405931?text=Hola,%20me%20gustar%C3%ADa%20consultar%20informaci%C3%B3n%20sobre%20los%20atractivos%20tur%C3%ADsticos"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block bg-[#d95d39] hover:bg-[#c44f2e] text-[#ffffff] font-semibold px-6 py-3 rounded-xl transition-colors duration-200 text-sm shadow-md"

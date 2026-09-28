@@ -1,8 +1,10 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function TermsAndConditionsPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-[#f7f4ed] py-12 px-4 md:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-[#e5ded0] p-6 md:p-10 shadow-sm">
@@ -108,7 +110,7 @@ export default function TermsAndConditionsPage() {
                 <strong className="text-[#2d2926]">Límites de Ruido y Convivencia:</strong> Con el fin de garantizar el descanso de todos los huéspedes, queda estrictamente prohibido el ruido excesivo, música alta o fiestas después de las 22:00 hrs.
               </li>
               <li>
-                <strong className="text-[#2d2926]">Fumar:</strong> Por disposición legal y para comodidad de todos, está strictly prohibido fumar dentro de las habitaciones y áreas cerradas. Quien infrinja esta norma se hará acreedor a un cargo por limpieza profunda y sanitización.
+                <strong className="text-[#2d2926]">Fumar:</strong> Por disposición legal y para comodidad de todos, está estrictamente prohibido fumar dentro de las habitaciones y áreas cerradas. Quien infrinja esta norma se hará acreedor a un cargo por limpieza profunda y sanitización.
               </li>
               <li>
                 <strong className="text-[#2d2926]">Objetos de Valor:</strong> El hotel no se hace responsable por objetos de valor o dinero en efectivo dejados en las habitaciones fuera de las cajas de seguridad destinadas para ello.
@@ -128,17 +130,18 @@ export default function TermsAndConditionsPage() {
 
         </div>
 
-        {/* Pie de página con botón para volver a la reserva */}
+        {/* Pie de página con botón dinámico para volver */}
         <div className="border-t border-[#e5ded0] pt-6 mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#988f86]">
             Última actualización: Septiembre 2026
           </p>
-          <Link
-            href="/reservar"
-            className="bg-[#2d2926] hover:bg-[#383330] text-[#e5ded0] text-xs font-bold px-6 py-2.5 rounded-xl transition-all uppercase tracking-wider"
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="bg-[#2d2926] hover:bg-[#383330] text-[#e5ded0] text-xs font-bold px-6 py-2.5 rounded-xl transition-all uppercase tracking-wider cursor-pointer"
           >
-            Volver al Checkout
-          </Link>
+            Volver a la pagina anterior
+          </button>
         </div>
 
       </div>
