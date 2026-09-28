@@ -4,9 +4,11 @@ import { Room } from '@/components/admin/rooms/RoomTable';
 const mockRooms: Room[] = [
   {
     id: '121097',
-    image: '/image-hero.png',
+    image: '/image-hero.webp',
     number: '230',
     type: 'Suite Presidencial',
+    adults: 2,
+    children: 1,
     capacity: '2 Ad, 1 Niñ',
     price: '$2,400 MXN',
     status: 'Disponible',
@@ -14,9 +16,11 @@ const mockRooms: Room[] = [
   },
   {
     id: '121092',
-    image: '/image-hero.png',
+    image: '/image-hero.webp',
     number: '27',
     type: 'Habitación Doble',
+    adults: 2,
+    children: 0,
     capacity: '2 Ad',
     price: '$1,200 MXN',
     status: 'Ocupada',
@@ -24,9 +28,11 @@ const mockRooms: Room[] = [
   },
   {
     id: '121093',
-    image: '/image-hero.png',
+    image: '/image-hero.webp',
     number: '20',
     type: 'Habitación Estándar',
+    adults: 2,
+    children: 0,
     capacity: '2 Ad',
     price: '$1,200 MXN',
     status: 'Limpieza',
@@ -34,9 +40,11 @@ const mockRooms: Room[] = [
   },
   {
     id: '121094',
-    image: '/image-hero.png',
+    image: '/image-hero.webp',
     number: '13',
     type: 'Habitación Estándar',
+    adults: 2,
+    children: 0,
     capacity: '2 Ad',
     price: '$1,200 MXN',
     status: 'Limpieza',
@@ -44,9 +52,11 @@ const mockRooms: Room[] = [
   },
   {
     id: '121095',
-    image: '/image-hero.png',
+    image: '/image-hero.webp',
     number: '14',
     type: 'Habitación Estándar',
+    adults: 2,
+    children: 0,
     capacity: '2 Ad',
     price: '$1,200 MXN',
     status: 'Ocupada',
@@ -54,9 +64,11 @@ const mockRooms: Room[] = [
   },
   {
     id: '121099',
-    image: '/image-hero.png',
+    image: '/image-hero.webp',
     number: '336',
     type: 'Suite Jr.',
+    adults: 2,
+    children: 0,
     capacity: '2 Ad',
     price: '$1,200 MXN',
     status: 'Mantenimiento',
@@ -65,6 +77,5 @@ const mockRooms: Room[] = [
 ];
 
 export default async function RoomsPage() {
-
   return <RoomsClient initialRooms={mockRooms} />;
 }
