@@ -17,6 +17,13 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
   const [selectedStatus, setSelectedStatus] = useState('Todos');
   const [selectedType, setSelectedType] = useState('Todos');
 
+  // Selección Múltiple
+  const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   // Modales
   const [viewingRoom, setViewingRoom] = useState<Room | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -24,9 +31,28 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  // Eliminación (Individual y Masiva)
   const [deletingRoom, setDeletingRoom] = useState<Room | null>(null);
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  // Handlers para Selección
+  const handleSelectRoom = (id: string) => {
+    setSelectedRoomIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllPage = (visibleIds: string[]) => {
+    const allSelected = visibleIds.every((id) => selectedRoomIds.includes(id));
+    if (allSelected) {
+      setSelectedRoomIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setSelectedRoomIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
+
+  // Handlers de Apertura de Modales
   const handleViewClick = (room: Room) => {
     setViewingRoom(room);
     setIsViewModalOpen(true);
@@ -37,17 +63,30 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteClick = (room: Room) => {
+  const handleDeleteSingle = (room: Room) => {
     setDeletingRoom(room);
+    setIsBulkDelete(false);
     setIsDeleteModalOpen(true);
   };
 
+  const handleDeleteBulk = () => {
+    setIsBulkDelete(true);
+    setDeletingRoom(null);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Confirmar Eliminación
   const handleConfirmDelete = () => {
-    if (deletingRoom) {
+    if (isBulkDelete) {
+      setRooms((prev) => prev.filter((r) => !selectedRoomIds.includes(r.id)));
+      setSelectedRoomIds([]);
+    } else if (deletingRoom) {
       setRooms((prev) => prev.filter((item) => item.id !== deletingRoom.id));
-      setIsDeleteModalOpen(false);
-      setDeletingRoom(null);
+      setSelectedRoomIds((prev) => prev.filter((id) => id !== deletingRoom.id));
     }
+    setIsDeleteModalOpen(false);
+    setDeletingRoom(null);
+    setIsBulkDelete(false);
   };
 
   const handleSaveRoom = (updatedRoom: Room) => {
@@ -56,6 +95,7 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
     );
   };
 
+  // Filtrado y Paginación
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch =
       room.number.includes(searchTerm) ||
@@ -72,6 +112,12 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  const totalPages = Math.ceil(filteredRooms.length / itemsPerPage) || 1;
+  const paginatedRooms = filteredRooms.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="flex-1 flex flex-col bg-[#f7f4ed]/40 min-h-screen">
       <main className="p-6 md:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
@@ -84,21 +130,46 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
           </p>
         </div>
 
+        {/* Filtros + Eliminación Masiva */}
         <RoomFilters
           searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
+          setSearchTerm={(term) => {
+            setSearchTerm(term);
+            setCurrentPage(1);
+          }}
           selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
+          setSelectedStatus={(status) => {
+            setSelectedStatus(status);
+            setCurrentPage(1);
+          }}
           selectedType={selectedType}
-          setSelectedType={setSelectedType}
+          setSelectedType={(type) => {
+            setSelectedType(type);
+            setCurrentPage(1);
+          }}
+          itemsPerPage={itemsPerPage}
+          setItemsPerPage={(pageSize) => {
+            setItemsPerPage(pageSize);
+            setCurrentPage(1);
+          }}
+          selectedCount={selectedRoomIds.length}
+          onDeleteSelected={handleDeleteBulk}
           onNewRoom={() => alert('Abrir modal para agregar nueva habitación')}
         />
 
+        {/* Tabla Paginada con Checkboxes */}
         <RoomTable
-          rooms={filteredRooms}
+          rooms={paginatedRooms}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          selectedRoomIds={selectedRoomIds}
+          onSelectRoom={handleSelectRoom}
+          onSelectAllPage={handleSelectAllPage}
+          onPageChange={(page) => setCurrentPage(page)}
           onView={handleViewClick}
           onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
+          onDelete={handleDeleteSingle}
         />
       </main>
 
@@ -124,13 +195,23 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
         onSave={handleSaveRoom}
       />
 
-      {/* Modal Reutilizable de Confirmación para Eliminar */}
+      {/* Modal Reutilizable de Confirmación de Eliminación */}
       <ConfirmDeleteModal
         isOpen={isDeleteModalOpen}
-        itemName={deletingRoom ? `Habitación N° ${deletingRoom.number}` : undefined}
-        description="Esta habitación será eliminada permanentemente del sistema de inventario."
+        itemName={
+          isBulkDelete
+            ? `${selectedRoomIds.length} habitaciones seleccionadas`
+            : deletingRoom
+            ? `Habitación N° ${deletingRoom.number}`
+            : undefined
+        }
+        description={
+          isBulkDelete
+            ? `¿Estás seguro de que deseas eliminar permanentemente estas ${selectedRoomIds.length} habitaciones del inventario?`
+            : 'Esta habitación será eliminada permanentemente del sistema de inventario.'
+        }
         itemDetails={
-          deletingRoom ? (
+          !isBulkDelete && deletingRoom ? (
             <div className="flex flex-col gap-1">
               <div className="flex justify-between">
                 <span className="text-[#5a524c]">ID:</span>
@@ -150,6 +231,7 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
         onClose={() => {
           setIsDeleteModalOpen(false);
           setDeletingRoom(null);
+          setIsBulkDelete(false);
         }}
         onConfirm={handleConfirmDelete}
       />
