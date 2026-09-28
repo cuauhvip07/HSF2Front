@@ -4,7 +4,8 @@ import { useState } from 'react';
 import GuestFilters from '@/components/admin/guests/GuestFilters';
 import GuestTable, { Guest } from '@/components/admin/guests/GuestTable';
 import EditGuestModal from '@/components/admin/guests/EditGuestModal';
-import ViewGuestModal from '@/components/admin/guests/ViewGuestModal'; // Importar el nuevo modal
+import ViewGuestModal from '@/components/admin/guests/ViewGuestModal';
+import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 
 interface GuestsClientProps {
   initialGuests: Guest[];
@@ -15,34 +16,45 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('Todos');
 
-  // Estado para el modal de edición
+  // Modales
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Estado para el modal de ver detalle/historial
   const [viewingGuest, setViewingGuest] = useState<Guest | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  // Abrir modal de detalles/historial al presionar el ojo o el reloj
+  const [deletingGuest, setDeletingGuest] = useState<Guest | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const handleViewClick = (guest: Guest) => {
     setViewingGuest(guest);
     setIsViewModalOpen(true);
   };
 
-  // Abrir modal de edición al presionar el lápiz
   const handleEditClick = (guest: Guest) => {
     setEditingGuest(guest);
     setIsEditModalOpen(true);
   };
 
-  // Guardar los cambios del huésped editado
+  const handleDeleteClick = (guest: Guest) => {
+    setDeletingGuest(guest);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletingGuest) {
+      setGuests((prev) => prev.filter((item) => item.id !== deletingGuest.id));
+      setIsDeleteModalOpen(false);
+      setDeletingGuest(null);
+    }
+  };
+
   const handleSaveGuest = (updatedGuest: Guest) => {
     setGuests((prev) =>
       prev.map((item) => (item.id === updatedGuest.id ? updatedGuest : item))
     );
   };
 
-  // Filtrado de la lista
   const filteredGuests = guests.filter((guest) => {
     const matchesSearch =
       guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -81,10 +93,11 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
           onView={handleViewClick}
           onEdit={handleEditClick}
           onHistory={handleViewClick}
+          onDelete={handleDeleteClick}
         />
       </main>
 
-      {/* Modal de Detalle e Historial */}
+      {/* Modal Detalle e Historial */}
       <ViewGuestModal
         isOpen={isViewModalOpen}
         guest={viewingGuest}
@@ -95,7 +108,7 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
         onEditClick={handleEditClick}
       />
 
-      {/* Modal de Edición de Huésped */}
+      {/* Modal Editar Huésped */}
       <EditGuestModal
         isOpen={isEditModalOpen}
         guest={editingGuest}
@@ -105,6 +118,36 @@ export default function GuestsClient({ initialGuests }: GuestsClientProps) {
           setEditingGuest(null);
         }}
         onSave={handleSaveGuest}
+      />
+
+      {/* Modal Reutilizable de Confirmación para Eliminar Huésped */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        itemName={deletingGuest ? `al huésped ${deletingGuest.name}` : undefined}
+        description="Se eliminará este perfil. Su historial de reservaciones vinculadas pasará a archivado."
+        itemDetails={
+          deletingGuest ? (
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Correo:</span>
+                <span className="font-semibold">{deletingGuest.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Teléfono:</span>
+                <span className="font-mono font-semibold">{deletingGuest.phone}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#5a524c]">Categoría:</span>
+                <span className="font-semibold">{deletingGuest.type}</span>
+              </div>
+            </div>
+          ) : null
+        }
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeletingGuest(null);
+        }}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

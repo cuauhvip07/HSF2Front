@@ -7,16 +7,17 @@ export interface Guest {
   phone: string;
   nationality: string;
   lastReservation: string;
-  type: string; // Tipo flexible para evitar errores de type mismatch
+  type: string;
   totalReservations: number;
-  adults?: number;   // Propiedad agregada para evitar errores de TypeScript
-  children?: number; // Propiedad agregada para evitar errores de TypeScript
+  adults?: number;
+  children?: number;
 }
 
 interface GuestTableProps {
   guests: Guest[];
   onView?: (guest: Guest) => void;
   onEdit?: (guest: Guest) => void;
+  onDelete?: (guest: Guest) => void; // <-- Propiedad agregada
   onHistory?: (guest: Guest) => void;
 }
 
@@ -24,6 +25,7 @@ export default function GuestTable({
   guests,
   onView,
   onEdit,
+  onDelete,
   onHistory,
 }: GuestTableProps) {
   const getTypeBadge = (type: string) => {
@@ -41,14 +43,12 @@ export default function GuestTable({
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-[#e5ded0] overflow-hidden">
-      {/* Encabezado de la tarjeta */}
       <div className="p-6 border-b border-[#e5ded0] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h3 className="text-lg font-serif font-bold text-[#2d2926]">
           Listado de Huéspedes
         </h3>
       </div>
 
-      {/* Tabla de registros */}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-[#2d2926]">
           <thead className="bg-[#f7f4ed] text-xs font-semibold uppercase text-[#5a524c]">
@@ -126,6 +126,18 @@ export default function GuestTable({
                           </svg>
                         </button>
                       )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={() => onDelete(guest)}
+                          className="p-1.5 text-[#5a524c] hover:text-red-600 transition-colors rounded-lg hover:bg-[#f7f4ed]"
+                          title="Eliminar huésped"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -133,25 +145,6 @@ export default function GuestTable({
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Paginación */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#f7f4ed]/50 border-t border-[#e5ded0] text-xs text-[#5a524c]">
-        <span>Página 1 de 1</span>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="px-3 py-1.5 bg-white border border-[#e5ded0] rounded-lg font-medium hover:bg-[#f7f4ed] transition-colors"
-          >
-            Anterior
-          </button>
-          <button
-            type="button"
-            className="px-3 py-1.5 bg-white border border-[#e5ded0] rounded-lg font-medium hover:bg-[#f7f4ed] transition-colors"
-          >
-            Siguiente
-          </button>
-        </div>
       </div>
     </div>
   );

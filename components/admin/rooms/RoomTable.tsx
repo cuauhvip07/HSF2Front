@@ -7,7 +7,9 @@ export interface Room {
   image?: string;
   number: string;
   type: string;
-  capacity: string;
+  adults: number;    // Selector numérico
+  children: number;  // Selector numérico
+  capacity?: string; // Formateado automático (ej. "2 Ad, 1 Niñ")
   price: string; 
   status: string; 
   housekeeping: string; 
@@ -17,8 +19,7 @@ interface RoomTableProps {
   rooms: Room[];
   onView?: (room: Room) => void;
   onEdit?: (room: Room) => void;
-  onDelete?: (room: Room) => void; // <-- Agregado para resolver el error en RoomsClient
-  onMaintenance?: (room: Room) => void;
+  onDelete?: (room: Room) => void;
 }
 
 export default function RoomTable({
@@ -26,7 +27,6 @@ export default function RoomTable({
   onView,
   onEdit,
   onDelete,
-  onMaintenance,
 }: RoomTableProps) {
   const getStatusBadge = (status: Room['status']) => {
     switch (status) {
@@ -44,16 +44,19 @@ export default function RoomTable({
     }
   };
 
+  const renderCapacity = (room: Room) => {
+    if (room.capacity) return room.capacity;
+    return `${room.adults} Ad${room.children > 0 ? `, ${room.children} Niñ` : ''}`;
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-[#e5ded0] overflow-hidden">
-      {/* Header secundario de la tabla */}
       <div className="p-6 border-b border-[#e5ded0] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h3 className="text-lg font-serif font-bold text-[#2d2926]">
           Listado de Habitaciones
         </h3>
       </div>
 
-      {/* Tabla de Habitaciones */}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-[#2d2926]">
           <thead className="bg-[#f7f4ed] text-xs font-semibold uppercase text-[#5a524c]">
@@ -102,7 +105,7 @@ export default function RoomTable({
                     {room.number}
                   </td>
                   <td className="py-3 px-4 font-medium">{room.type}</td>
-                  <td className="py-3 px-4 text-xs text-[#5a524c]">{room.capacity}</td>
+                  <td className="py-3 px-4 text-xs text-[#5a524c]">{renderCapacity(room)}</td>
                   <td className="py-3 px-4 font-semibold text-[#2d2926]">
                     {room.price}
                   </td>
