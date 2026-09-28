@@ -126,18 +126,6 @@ export default function GuestTable({
                           </svg>
                         </button>
                       )}
-                      {onHistory && (
-                        <button
-                          type="button"
-                          onClick={() => onHistory(guest)}
-                          className="p-1.5 text-[#5a524c] hover:text-[#d95d39] transition-colors rounded-lg hover:bg-[#f7f4ed]"
-                          title="Historial de reservas"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
