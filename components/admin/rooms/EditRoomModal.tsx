@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Room } from './RoomTable';
+import { Room } from '@/types/room';
 import ImageUploader from './ImageUploader';
 
 interface EditRoomModalProps {
@@ -73,7 +73,7 @@ export default function EditRoomModal({
 
   const onSubmit = (data: Room) => {
     const formattedCapacity = `${data.adults} Ad${
-      data.children > 0 ? `, ${data.children} Niñ` : ''
+      (data.children ?? 0) > 0 ? `, ${data.children} Niñ` : ''
     }`;
 
     const updatedRoom: Room = {
@@ -83,6 +83,30 @@ export default function EditRoomModal({
       capacity: formattedCapacity,
       image: newImagePreview || data.image,
     };
+
+    /* ========================================================================
+       PETICIÓN AL BACKEND (FETCH OPCIONAL PARA EDITAR HABITACIÓN)
+       URL Endpoint: PUT http://localhost:4000/api/v1/rooms/${room.id}
+       ========================================================================
+
+    try {
+      const response = await fetch(`http://localhost:4000/api/v1/rooms/${room.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRoom),
+      });
+
+      if (!response.ok) throw new Error('Error al actualizar la habitación');
+
+      const savedData = await response.json();
+      onSave(savedData);
+      onClose();
+    } catch (error) {
+      console.error('Error al guardar cambios:', error);
+    }
+    ======================================================================== */
 
     onSave(updatedRoom);
     onClose();
@@ -99,7 +123,7 @@ export default function EditRoomModal({
               ID Habitación: #{room.id}
             </span>
             <h3 className="text-xl font-serif font-bold text-[#2d2926]">
-              Editar Habitación N° {room.number}
+              Editar Habitación {room.number ? `N° ${room.number}` : room.title}
             </h3>
           </div>
           <button
@@ -161,7 +185,7 @@ export default function EditRoomModal({
             </div>
           </div>
 
-          {/* CAPACIDAD: SELECTORES PURAMENTE NUMÉRICOS (SIN TEXTO LIBRE) */}
+          {/* CAPACIDAD: SELECTORES PURAMENTE NUMÉRICOS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#f7f4ed]/40 p-4 rounded-xl border border-[#e5ded0]">
             <div>
               <label className="block text-xs font-semibold text-[#5a524c] mb-1">
@@ -196,30 +220,23 @@ export default function EditRoomModal({
             </div>
           </div>
 
-          {/* Tarifa por Noche */}
+          {/* TARIFA DESHABILITADA (SE GESTIONA EN EL MODAL DE TARIFAS) */}
           <div>
-            <label className="block text-xs font-semibold text-[#5a524c] mb-1">
-              Tarifa Por Noche ($ MXN) <span className="text-[#d95d39]">*</span>
-            </label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-semibold text-[#5a524c]">
+                Tarifa General / Base (Solo lectura)
+              </label>
+              <span className="text-[10px] text-[#c0a060] font-bold">
+                🔒 Configurable en "Gestión de Tarifas"
+              </span>
+            </div>
             <input
               type="text"
-              placeholder="$1,200 MXN"
-              {...register('price', {
-                required: 'El precio por noche es obligatorio',
-                pattern: {
-                  value: /^\$?[0-9,]+(\.[0-9]{2})?\s*(MXN|USD)?$/i,
-                  message: 'Ingresa un formato válido (Ej. $1,200 MXN)',
-                },
-              })}
-              className={`w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border rounded-xl text-sm font-semibold text-[#2d2926] focus:outline-none transition-colors ${
-                errors.price ? 'border-[#d95d39]' : 'border-[#e5ded0] focus:border-[#c0a060]'
-              }`}
+              disabled
+              readOnly
+              {...register('price')}
+              className="w-full px-3.5 py-2.5 bg-[#e5ded0]/40 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#988f86] cursor-not-allowed select-none"
             />
-            {errors.price && (
-              <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
-                {errors.price.message}
-              </p>
-            )}
           </div>
 
           {/* Estado de Ocupación y Limpieza */}
