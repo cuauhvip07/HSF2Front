@@ -1,21 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import { Room } from '@/types/room';
 
-export interface Room {
-  id: string;
-  image?: string;
-  number: string;
-  type: string;
-  adults: number;
-  children: number;
-  capacity?: string;
-  price: string;
-  status: string;
-  housekeeping: string;
-}
-
-interface RoomTableProps {
+export interface RoomTableProps {
   rooms: Room[];
   currentPage?: number;
   totalPages?: number;
@@ -27,6 +15,7 @@ interface RoomTableProps {
   onView?: (room: Room) => void;
   onEdit?: (room: Room) => void;
   onDelete?: (room: Room) => void;
+  onConfigureRates?: (room: Room) => void; // 🌟 Se agrega la prop para resolver el error
 }
 
 export default function RoomTable({
@@ -41,11 +30,12 @@ export default function RoomTable({
   onView,
   onEdit,
   onDelete,
+  onConfigureRates,
 }: RoomTableProps) {
   const startIndex = (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, rooms.length);
 
-  const visibleIds = rooms.map((r) => r.id);
+  const visibleIds = rooms.map((r) => String(r.id));
   const isAllPageSelected =
     visibleIds.length > 0 && visibleIds.every((id) => selectedRoomIds.includes(id));
 
@@ -53,7 +43,7 @@ export default function RoomTable({
     onSelectAllPage(visibleIds);
   };
 
-  const getStatusBadge = (status: Room['status']) => {
+  const getStatusBadge = (status?: string) => {
     switch (status) {
       case 'Disponible':
         return 'bg-[#d1fae5] text-[#065f46] border-[#a7f3d0]';
@@ -61,6 +51,7 @@ export default function RoomTable({
       case 'Reservada':
         return 'bg-[#fee2e2] text-[#991b1b] border-[#fca5a5]';
       case 'Limpieza':
+      case 'En Limpieza':
         return 'bg-[#fef3c7] text-[#92400e] border-[#fde68a]';
       case 'Mantenimiento':
         return 'bg-[#f3f4f6] text-[#1f2937] border-[#d1d5db]';
@@ -71,7 +62,10 @@ export default function RoomTable({
 
   const renderCapacity = (room: Room) => {
     if (room.capacity) return room.capacity;
-    return `${room.adults} Ad${room.children > 0 ? `, ${room.children} Niñ` : ''}`;
+    if (room.adults !== undefined) {
+      return `${room.adults} Ad${(room.children ?? 0) > 0 ? `, ${room.children} Niñ` : ''}`;
+    }
+    return 'N/A';
   };
 
   return (
@@ -103,25 +97,25 @@ export default function RoomTable({
               </th>
               <th className="py-3 px-4">ID</th>
               <th className="py-3 px-4">Imagen</th>
-              <th className="py-3 px-4">Número</th>
-              <th className="py-3 px-4">Tipo de Habitación</th>
+              <th className="py-3 px-4">Número / Título</th>
               <th className="py-3 px-4">Capacidad</th>
-              <th className="py-3 px-4">Tarifa por Noche</th>
+              <th className="py-3 px-4">Tarifas (Lun-Jue / Vie-Dom)</th>
               <th className="py-3 px-4">Estado</th>
-              <th className="py-3 px-4">Limpieza</th>
               <th className="py-3 px-4 text-center">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e5ded0]">
             {rooms.length === 0 ? (
               <tr>
-                <td colSpan={10} className="py-8 text-center text-sm text-[#5a524c]">
+                <td colSpan={8} className="py-8 text-center text-sm text-[#5a524c]">
                   No se encontraron habitaciones registradas.
                 </td>
               </tr>
             ) : (
               rooms.map((room) => {
-                const isSelected = selectedRoomIds.includes(room.id);
+                const roomIdStr = String(room.id);
+                const isSelected = selectedRoomIds.includes(roomIdStr);
+
                 return (
                   <tr
                     key={room.id}
@@ -133,19 +127,19 @@ export default function RoomTable({
                       <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => onSelectRoom(room.id)}
+                        onChange={() => onSelectRoom(roomIdStr)}
                         className="w-4 h-4 rounded border-[#e5ded0] text-[#d95d39] focus:ring-[#c0a060] cursor-pointer"
                       />
                     </td>
                     <td className="py-3 px-4 font-mono font-semibold text-xs text-[#5a524c]">
-                      {room.id}
+                      #{room.id}
                     </td>
                     <td className="py-3 px-4">
                       <div className="relative w-12 h-9 rounded-md overflow-hidden bg-gray-100 border border-[#e5ded0]">
                         {room.image ? (
                           <Image
                             src={room.image}
-                            alt={`Habitación ${room.number}`}
+                            alt={room.title || `Habitación ${room.number}`}
                             fill
                             className="object-cover"
                           />
@@ -157,35 +151,48 @@ export default function RoomTable({
                       </div>
                     </td>
                     <td className="py-3 px-4 font-bold text-[#2d2926]">
-                      {room.number}
+                      {room.number ? `Hab. ${room.number}` : room.title}
                     </td>
-                    <td className="py-3 px-4 font-medium">{room.type}</td>
                     <td className="py-3 px-4 text-xs text-[#5a524c]">{renderCapacity(room)}</td>
-                    <td className="py-3 px-4 font-semibold text-[#2d2926]">
-                      {room.price}
+                    <td className="py-3 px-4 font-mono text-xs">
+                      <span className="font-semibold text-[#2d2926]">
+                        {room.ratesConfig?.baseWeekdayPrice
+                          ? `$${room.ratesConfig.baseWeekdayPrice}`
+                          : room.priceRegular || room.priceMin || '$0'}
+                      </span>
+                      <span className="text-[#988f86]"> / </span>
+                      <span className="font-semibold text-[#d95d39]">
+                        {room.ratesConfig?.baseWeekendPrice
+                          ? `$${room.ratesConfig.baseWeekendPrice}`
+                          : room.priceHigh || '$0'}
+                      </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusBadge(
-                          room.status
-                        )}`}
-                      >
-                        {room.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-xs font-medium">
-                      <span
-                        className={
-                          room.housekeeping === 'Limpia'
-                            ? 'text-emerald-700 font-semibold'
-                            : 'text-amber-700 font-semibold'
-                        }
-                      >
-                        {room.housekeeping}
-                      </span>
+                      {room.status && (
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusBadge(
+                            room.status
+                          )}`}
+                        >
+                          {room.status}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <div className="flex justify-center items-center gap-1.5">
+                        {/* Botón Gestión de Tarifas */}
+                        {onConfigureRates && (
+                          <button
+                            type="button"
+                            onClick={() => onConfigureRates(room)}
+                            className="p-1.5 text-[#5a524c] hover:text-[#d95d39] transition-colors rounded-lg hover:bg-[#f7f4ed]"
+                            title="Gestionar tarifas y temporadas"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+                        )}
                         {onView && (
                           <button
                             type="button"
