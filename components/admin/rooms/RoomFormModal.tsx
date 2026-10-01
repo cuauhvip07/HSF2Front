@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Room } from '@/types/room';
+import { Room } from './RoomTable';
 import ImageUploader from './ImageUploader';
 
 interface RoomFormModalProps {
