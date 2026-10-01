@@ -6,6 +6,7 @@ import RoomTable from '@/components/admin/rooms/RoomTable';
 import ViewRoomModal from '@/components/admin/rooms/ViewRoomModal';
 import EditRoomModal from '@/components/admin/rooms/EditRoomModal';
 import RoomRatesModal from '@/components/admin/rooms/RoomRatesModal';
+import RoomFormModal from '@/components/admin/rooms/RoomFormModal';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import { Room, RoomRatesConfig } from '@/types/room';
 
@@ -27,6 +28,8 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Modales
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+
   const [viewingRoom, setViewingRoom] = useState<Room | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
@@ -84,6 +87,11 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
     setIsBulkDelete(true);
     setDeletingRoom(null);
     setIsDeleteModalOpen(true);
+  };
+
+  // Guardar Nueva Habitación
+  const handleCreateRoom = (newRoom: Room) => {
+    setRooms((prev) => [newRoom, ...prev]);
   };
 
   // Confirmar Eliminación
@@ -166,7 +174,7 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
           </p>
         </div>
 
-        {/* Filtros + Eliminación Masiva */}
+        {/* Filtros + Eliminación Masiva + Botón Nueva Habitación */}
         <RoomFilters
           searchTerm={searchTerm}
           setSearchTerm={(term) => {
@@ -190,7 +198,7 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
           }}
           selectedCount={selectedRoomIds.length}
           onDeleteSelected={handleDeleteBulk}
-          onNewRoom={() => alert('Abrir modal para agregar nueva habitación')}
+          onNewRoom={() => setIsFormModalOpen(true)}
         />
 
         {/* Tabla Paginada con Checkboxes */}
@@ -209,6 +217,13 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
           onConfigureRates={handleConfigureRatesClick}
         />
       </main>
+
+      {/* Modal Registrar Nueva Habitación */}
+      <RoomFormModal
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+        onSave={handleCreateRoom}
+      />
 
       {/* Modal Ver Detalle */}
       <ViewRoomModal
