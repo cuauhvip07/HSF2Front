@@ -2,22 +2,30 @@
 
 export interface SeasonRate {
   id: string;
-  name: string; // ej: "Temporada Alta - Navidades", "Verano Boutique"
-  startDate: string; // YYYY-MM-DD
-  endDate: string;   // YYYY-MM-DD
+  name: string;
+  startDate: string;
+  endDate: string;
   pricePerNight: number;
 }
 
 export interface SpecialDateRate {
   id: string;
-  date: string; // YYYY-MM-DD
+  date: string;
   pricePerNight: number;
-  reason?: string; // ej: "Concierto / Puente / Alta Demanda"
+  reason?: string;
 }
 
+export interface DayRateGroup {
+  id: string;
+  days: string[];
+  price: number;
+}
+
+// ✅ Se unifica RoomRatesConfig en una sola interfaz
 export interface RoomRatesConfig {
-  baseWeekdayPrice: number; // Lunes a Jueves
-  baseWeekendPrice: number; // Viernes a Domingo
+  baseWeekdayPrice: number;
+  baseWeekendPrice: number;
+  dayRateGroups?: DayRateGroup[];
   seasons: SeasonRate[];
   specialDates: SpecialDateRate[];
 }
@@ -25,32 +33,18 @@ export interface RoomRatesConfig {
 export interface Room {
   id: number | string;
   number?: string;
-  title: string; // ej: "Habitación Deluxe 101"
+  title?: string; 
   type?: string;
   adults?: number;
   children?: number;
-  capacity: string; // ej: "2 Adultos, 1 Niño"
-  description: string;
-  priceMin: string; // Tarifa Mínima / Baja
-  priceRegular: string; // Tarifa Regular (L-J)
-  priceHigh: string; // Tarifa Alta / Fin de Semana
-  price?: string; // 🌟 AÑADIDO: Propiedad opcional para precio general/mostrado
+  capacity?: string; 
+  description?: string; 
+  priceMin?: string;
+  priceRegular?: string;
+  priceHigh?: string;
+  price?: string;
   image: string;
-  status?: 'Disponible' | 'Ocupada' | 'Reservada' | 'Mantenimiento' | string;
-  housekeeping?: 'Limpia' | 'Sucio' | 'En Limpieza' | 'Inspeccionada' | string;
+  status?: 'Disponible' | 'Ocupada' | 'Reservada' | 'Limpieza' | 'Mantenimiento' | string;
+  housekeeping?: 'Limpia' | 'Sucio' | 'En Limpieza' | 'Pendiente' | 'Inspeccionada' | string;
   ratesConfig?: RoomRatesConfig;
-}
-
-export interface DayRateGroup {
-  id: string;
-  days: string[]; // ['L', 'M', 'X', 'J', 'V', 'S', 'D']
-  price: number;
-}
-
-export interface RoomRatesConfig {
-  baseWeekdayPrice: number;
-  baseWeekendPrice: number;
-  dayRateGroups?: DayRateGroup[]; // 🌟 Nuevo arreglo de reglas matriciales por días
-  seasons: SeasonRate[];
-  specialDates: SpecialDateRate[];
 }

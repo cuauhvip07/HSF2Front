@@ -9,6 +9,7 @@ export interface RoomFiltersProps {
   setSelectedStatus: (status: string) => void;
   selectedType: string;
   setSelectedType: (type: string) => void;
+  availableRoomTypes?: string[];
   itemsPerPage?: number;
   setItemsPerPage?: (pageSize: number) => void;
   selectedCount?: number;
@@ -17,13 +18,6 @@ export interface RoomFiltersProps {
 }
 
 const statusOptions = ['Todos', 'Disponible', 'Ocupada', 'Mantenimiento', 'Reservada'];
-const typeOptions = [
-  'Todos',
-  'Habitación Doble Sencilla',
-  'Habitación Doble',
-  'Habitación Triple Familiar',
-  'Habitación Cuádruple',
-];
 
 export default function RoomFilters({
   searchTerm,
@@ -32,6 +26,7 @@ export default function RoomFilters({
   setSelectedStatus,
   selectedType,
   setSelectedType,
+  availableRoomTypes = [],
   itemsPerPage = 10,
   setItemsPerPage,
   selectedCount = 0,
@@ -39,6 +34,7 @@ export default function RoomFilters({
   onNewRoom,
 }: RoomFiltersProps) {
   const safeItemsPerPage = Number(itemsPerPage) || 10;
+  const typeOptions = ['Todos', ...availableRoomTypes];
 
   const [selectedPageSizeOption, setSelectedPageSizeOption] = useState<string>(
     safeItemsPerPage === 10 || safeItemsPerPage === 100
@@ -80,9 +76,7 @@ export default function RoomFilters({
 
   return (
     <div className="bg-white p-5 rounded-2xl border border-[#e5ded0] shadow-sm flex flex-col gap-4">
-      {/* FILA SUPERIOR: Búsqueda y Paginación/Cantidad por página */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-        {/* 1. Campo de Búsqueda */}
         <div className="relative w-full">
           <input
             type="text"
@@ -106,7 +100,6 @@ export default function RoomFilters({
           </svg>
         </div>
 
-        {/* 2. Selector de Mostrar x Página (con input integrado de forma limpia) */}
         <div className="flex items-center justify-start md:justify-end gap-2">
           <label className="text-xs font-semibold text-[#5a524c] whitespace-nowrap">
             Registros por página:
@@ -139,11 +132,8 @@ export default function RoomFilters({
         </div>
       </div>
 
-      {/* FILA INFERIOR: Tipo, Estado y Acciones del lado derecho */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 pt-2 border-t border-[#e5ded0]/60">
-        {/* Filtros de Selección: Tipo y Estado */}
         <div className="flex flex-wrap items-center gap-4">
-          {/* 3. Tipo de Habitación */}
           <div className="flex items-center gap-2">
             <label htmlFor="room-type-select" className="text-xs font-semibold text-[#5a524c] whitespace-nowrap">
               Tipo:
@@ -162,7 +152,6 @@ export default function RoomFilters({
             </select>
           </div>
 
-          {/* 4. Estado de Habitación */}
           <div className="flex items-center gap-2">
             <label htmlFor="room-status-select" className="text-xs font-semibold text-[#5a524c] whitespace-nowrap">
               Estado:
@@ -182,7 +171,6 @@ export default function RoomFilters({
           </div>
         </div>
 
-        {/* ACCIONES DEL LADO DERECHO: Eliminar Seleccionados y Crear Nueva Habitación */}
         <div className="flex items-center justify-end gap-3">
           {selectedCount > 0 && onDeleteSelected && (
             <button

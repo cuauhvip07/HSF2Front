@@ -1,81 +1,37 @@
+import { cookies } from 'next/headers';
 import RoomsClient from '@/components/admin/rooms/RoomsClient';
-import { Room } from '@/components/admin/rooms/RoomTable';
+import { Room } from '@/types/room';
 
-const mockRooms: Room[] = [
-  {
-    id: '121097',
-    image: '/image-hero.webp',
-    number: '230',
-    type: 'Suite Presidencial',
-    adults: 2,
-    children: 1,
-    capacity: '2 Ad, 1 Niñ',
-    price: '$2,400 MXN',
-    status: 'Disponible',
-    housekeeping: 'Limpia',
-  },
-  {
-    id: '121092',
-    image: '/image-hero.webp',
-    number: '27',
-    type: 'Habitación Doble',
-    adults: 2,
-    children: 0,
-    capacity: '2 Ad',
-    price: '$1,200 MXN',
-    status: 'Ocupada',
-    housekeeping: 'Limpia',
-  },
-  {
-    id: '121093',
-    image: '/image-hero.webp',
-    number: '20',
-    type: 'Habitación Estándar',
-    adults: 2,
-    children: 0,
-    capacity: '2 Ad',
-    price: '$1,200 MXN',
-    status: 'Limpieza',
-    housekeeping: 'Pendiente',
-  },
-  {
-    id: '121094',
-    image: '/image-hero.webp',
-    number: '13',
-    type: 'Habitación Estándar',
-    adults: 2,
-    children: 0,
-    capacity: '2 Ad',
-    price: '$1,200 MXN',
-    status: 'Limpieza',
-    housekeeping: 'Pendiente',
-  },
-  {
-    id: '121095',
-    image: '/image-hero.webp',
-    number: '14',
-    type: 'Habitación Estándar',
-    adults: 2,
-    children: 0,
-    capacity: '2 Ad',
-    price: '$1,200 MXN',
-    status: 'Ocupada',
-    housekeeping: 'Limpia',
-  },
-  {
-    id: '121099',
-    image: '/image-hero.webp',
-    number: '336',
-    type: 'Suite Jr.',
-    adults: 2,
-    children: 0,
-    capacity: '2 Ad',
-    price: '$1,200 MXN',
-    status: 'Mantenimiento',
-    housekeeping: 'Limpia',
-  },
-];
+async function getRoomsData() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('AUTH_TOKEN')?.value;
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
+  try {
+    const [roomsRes, typesRes] = await Promise.all([
+      fetch(`${API_URL}/rooms`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      }),
+      fetch(`${API_URL}/room-types`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      }),
+    ]);
+
+    const rooms: Room[] = roomsRes.ok ? await roomsRes.json() : [];
+    const roomTypes: string[] = typesRes.ok ? await typesRes.json() : [];
+
+    return { rooms, roomTypes };
+  } catch (error) {
+    console.error('Error al obtener datos de habitaciones/tipos:', error);
+    return { rooms: [], roomTypes: [] };
+  }
+}
 
 export default async function RoomsPage() {
-  return <RoomsClient initialRooms={mockRooms} />;
+  const { rooms, roomTypes } = await getRoomsData();
+
+  return <RoomsClient initialRooms={rooms} availableRoomTypes={roomTypes} />;
 }
