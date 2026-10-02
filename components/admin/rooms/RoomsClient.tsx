@@ -7,6 +7,7 @@ import RoomTable from '@/components/admin/rooms/RoomTable';
 import ViewRoomModal from '@/components/admin/rooms/ViewRoomModal';
 import EditRoomModal from '@/components/admin/rooms/EditRoomModal';
 import RoomRatesModal from '@/components/admin/rooms/RoomRatesModal';
+import RoomFormModal from '@/components/admin/rooms/RoomFormModal';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import { Room, RoomRatesConfig } from '@/types/room';
 import { updateRoomRates, deleteRoom, deleteBulkRooms } from '@/services/roomService';
@@ -34,6 +35,9 @@ export default function RoomsClient({
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Modales
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
   const [viewingRoom, setViewingRoom] = useState<Room | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -90,24 +94,19 @@ export default function RoomsClient({
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = async () => {
-    try {
-      if (isBulkDelete) {
-        await deleteBulkRooms(selectedRoomIds);
-        setRooms((prev) => prev.filter((r) => !selectedRoomIds.includes(String(r.id))));
-        setSelectedRoomIds([]);
-      } else if (deletingRoom) {
-        await deleteRoom(deletingRoom.id);
-        setRooms((prev) => prev.filter((item) => String(item.id) !== String(deletingRoom.id)));
-        setSelectedRoomIds((prev) => prev.filter((id) => id !== String(deletingRoom.id)));
-      }
-      router.refresh();
-    } catch (error) {
-      console.error('Error al eliminar habitación(es):', error);
-    } finally {
-      setIsDeleteModalOpen(false);
-      setDeletingRoom(null);
-      setIsBulkDelete(false);
+  // Guardar Nueva Habitación
+  const handleCreateRoom = (newRoom: Room) => {
+    setRooms((prev) => [newRoom, ...prev]);
+  };
+
+  // Confirmar Eliminación
+  const handleConfirmDelete = () => {
+    if (isBulkDelete) {
+      setRooms((prev) => prev.filter((r) => !selectedRoomIds.includes(String(r.id))));
+      setSelectedRoomIds([]);
+    } else if (deletingRoom) {
+      setRooms((prev) => prev.filter((item) => String(item.id) !== String(deletingRoom.id)));
+      setSelectedRoomIds((prev) => prev.filter((id) => id !== String(deletingRoom.id)));
     }
   };
 
@@ -187,6 +186,7 @@ export default function RoomsClient({
           </p>
         </div>
 
+        {/* Filtros + Eliminación Masiva + Botón Nueva Habitación */}
         <RoomFilters
           searchTerm={searchTerm}
           setSearchTerm={(term) => {
@@ -211,7 +211,7 @@ export default function RoomsClient({
           }}
           selectedCount={selectedRoomIds.length}
           onDeleteSelected={handleDeleteBulk}
-          onNewRoom={() => alert('Abrir modal para agregar nueva habitación')}
+          onNewRoom={() => setIsFormModalOpen(true)}
         />
 
         <RoomTable
@@ -230,6 +230,14 @@ export default function RoomsClient({
         />
       </main>
 
+      {/* Modal Registrar Nueva Habitación */}
+      <RoomFormModal
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+        onSave={handleCreateRoom}
+      />
+
+      {/* Modal Ver Detalle */}
       <ViewRoomModal
         isOpen={isViewModalOpen}
         room={viewingRoom}
