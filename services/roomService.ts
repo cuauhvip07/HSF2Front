@@ -1,36 +1,84 @@
-import { fetchApi } from '@/lib/api';
 import { Room, RoomRatesConfig } from '@/types/room';
 
-export const getRooms = async (): Promise<Room[]> => {
-  return await fetchApi<Room[]>('/rooms');
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
+export const createRoom = async (roomData: Partial<Room>): Promise<Room> => {
+  const response = await fetch(`${API_URL}/rooms`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // 🟢 Envía las cookies directamente a Express
+    body: JSON.stringify(roomData),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al crear la habitación');
+  }
+
+  return response.json();
 };
 
-export const updateRoom = async (room: Room): Promise<Room> => {
-  return await fetchApi<Room>(`/rooms/${room.id}`, {
+export const updateRoom = async (
+  roomId: string | number,
+  roomData: Partial<Room>
+): Promise<Room> => {
+  const response = await fetch(`${API_URL}/rooms/${roomId}`, {
     method: 'PUT',
-    body: JSON.stringify(room),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(roomData),
   });
+
+  if (!response.ok) {
+    throw new Error('Error al actualizar la habitación');
+  }
+
+  return response.json();
 };
 
 export const updateRoomRates = async (
   roomId: string | number,
   config: RoomRatesConfig
-): Promise<{ message: string }> => {
-  return await fetchApi<{ message: string }>(`/rooms/${roomId}/rates`, {
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/rooms/${roomId}/rates`, {
     method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
     body: JSON.stringify(config),
   });
+
+  if (!response.ok) {
+    throw new Error('Error al actualizar las tarifas');
+  }
 };
 
 export const deleteRoom = async (roomId: string | number): Promise<void> => {
-  await fetchApi(`/rooms/${roomId}`, {
+  const response = await fetch(`${API_URL}/rooms/${roomId}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
+
+  if (!response.ok) {
+    throw new Error('Error al eliminar la habitación');
+  }
 };
 
-export const deleteBulkRooms = async (roomIds: string[]): Promise<void> => {
-  await fetchApi('/rooms/delete-bulk', {
-    method: 'POST',
-    body: JSON.stringify({ ids: roomIds }),
+export const deleteBulkRooms = async (ids: string[]): Promise<void> => {
+  const response = await fetch(`${API_URL}/rooms/bulk-delete`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ ids }),
   });
+
+  if (!response.ok) {
+    throw new Error('Error al eliminar las habitaciones seleccionadas');
+  }
 };

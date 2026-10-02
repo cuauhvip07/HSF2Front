@@ -36,7 +36,6 @@ export default function RoomsClient({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Modales
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
   const [viewingRoom, setViewingRoom] = useState<Room | null>(null);
@@ -97,16 +96,28 @@ export default function RoomsClient({
   // Guardar Nueva Habitación
   const handleCreateRoom = (newRoom: Room) => {
     setRooms((prev) => [newRoom, ...prev]);
+    setIsFormModalOpen(false);
+    router.refresh();
   };
 
-  // Confirmar Eliminación
-  const handleConfirmDelete = () => {
-    if (isBulkDelete) {
-      setRooms((prev) => prev.filter((r) => !selectedRoomIds.includes(String(r.id))));
-      setSelectedRoomIds([]);
-    } else if (deletingRoom) {
-      setRooms((prev) => prev.filter((item) => String(item.id) !== String(deletingRoom.id)));
-      setSelectedRoomIds((prev) => prev.filter((id) => id !== String(deletingRoom.id)));
+  const handleConfirmDelete = async () => {
+    try {
+      if (isBulkDelete) {
+        await deleteBulkRooms(selectedRoomIds);
+        setRooms((prev) => prev.filter((r) => !selectedRoomIds.includes(String(r.id))));
+        setSelectedRoomIds([]);
+      } else if (deletingRoom) {
+        await deleteRoom(deletingRoom.id);
+        setRooms((prev) => prev.filter((item) => String(item.id) !== String(deletingRoom.id)));
+        setSelectedRoomIds((prev) => prev.filter((id) => id !== String(deletingRoom.id)));
+      }
+      router.refresh();
+    } catch (error) {
+      console.error('Error al eliminar habitación(es):', error);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setDeletingRoom(null);
+      setIsBulkDelete(false);
     }
   };
 
@@ -237,7 +248,6 @@ export default function RoomsClient({
         onSave={handleCreateRoom}
       />
 
-      {/* Modal Ver Detalle */}
       <ViewRoomModal
         isOpen={isViewModalOpen}
         room={viewingRoom}
@@ -276,8 +286,8 @@ export default function RoomsClient({
           isBulkDelete
             ? `${selectedRoomIds.length} habitaciones seleccionadas`
             : deletingRoom
-              ? `Habitación ${deletingRoom.number ? `N° ${deletingRoom.number}` : deletingRoom.title}`
-              : undefined
+            ? `Habitación ${deletingRoom.number ? `N° ${deletingRoom.number}` : deletingRoom.title}`
+            : undefined
         }
         description={
           isBulkDelete
