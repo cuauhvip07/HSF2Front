@@ -15,8 +15,18 @@ export interface RoomTableProps {
   onView?: (room: Room) => void;
   onEdit?: (room: Room) => void;
   onDelete?: (room: Room) => void;
-  onConfigureRates?: (room: Room) => void; // 🌟 Se agrega la prop para resolver el error
+  onConfigureRates?: (room: Room) => void;
 }
+
+const WEEKDAY_MAP: Record<number, string> = {
+  0: 'D', // Domingo
+  1: 'L', // Lunes
+  2: 'M', // Martes
+  3: 'X', // Miércoles
+  4: 'J', // Jueves
+  5: 'V', // Viernes
+  6: 'S', // Sábado
+};
 
 export default function RoomTable({
   rooms,
@@ -68,13 +78,91 @@ export default function RoomTable({
     return 'N/A';
   };
 
+  /**
+   * Calcula el precio aplicable el día de hoy e identifica si corresponde a una temporada.
+   */
+  const getCurrentDayRateInfo = (room: Room) => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    const dayKey = WEEKDAY_MAP[today.getDay()];
+
+    const config = room.ratesConfig;
+
+    // 1. Verificar Días Especiales / Festivos (Máxima prioridad)
+    if (config?.specialDates && config.specialDates.length > 0) {
+      const matchSpecial = config.specialDates.find((sp) => sp.date === todayStr);
+      if (matchSpecial) {
+        return {
+          price: matchSpecial.pricePerNight,
+          label: matchSpecial.reason || 'Día Especial',
+          isSeason: false,
+          isSpecial: true,
+          color: '#d95d39',
+        };
+      }
+    }
+
+    // 2. Verificar Temporadas Activas Hoy
+    if (config?.seasons && config.seasons.length > 0) {
+      const activeSeason: any = config.seasons.find((s: any) => {
+        if (!s.startDate || !s.endDate) return false;
+        return todayStr >= s.startDate && todayStr <= s.endDate;
+      });
+
+      if (activeSeason) {
+        const isWeekendRate =
+          activeSeason.weekendPricePerNight &&
+          activeSeason.weekendDays?.includes(dayKey);
+
+        const price = isWeekendRate
+          ? activeSeason.weekendPricePerNight
+          : activeSeason.pricePerNight;
+
+        return {
+          price,
+          label: activeSeason.name || 'Temporada',
+          isSeason: true,
+          isSpecial: false,
+          color: activeSeason.color || '#c0a060',
+        };
+      }
+    }
+
+    // 3. Tarifa Semanal Habitual por Grupos de Días
+    if (config?.dayRateGroups && config.dayRateGroups.length > 0) {
+      const matchGroup = config.dayRateGroups.find((g) => g.days.includes(dayKey));
+      if (matchGroup) {
+        return {
+          price: matchGroup.price,
+          label: ['V', 'S', 'D'].includes(dayKey) ? 'Fin de Semana' : 'Habitual',
+          isSeason: false,
+          isSpecial: false,
+        };
+      }
+    }
+
+    // 4. Fallback si no hay reglas configuradas
+    const fallbackPrice = Number(room.price?.replace(/[^0-9.]/g, '')) || 0;
+    return {
+      price: fallbackPrice,
+      label: 'Habitual',
+      isSeason: false,
+      isSpecial: false,
+    };
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-[#e5ded0] overflow-hidden">
       {/* Encabezado */}
       <div className="p-6 border-b border-[#e5ded0] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h3 className="text-lg font-serif font-bold text-[#2d2926]">
-          Listado de Habitaciones
-        </h3>
+        <div>
+          <h3 className="text-lg font-serif font-bold text-[#2d2926]">
+            Listado de Habitaciones
+          </h3>
+          <p className="text-xs text-[#5a524c]">
+            Muestra el precio activo el día de hoy según la tarifa o temporada correspondiente.
+          </p>
+        </div>
         {rooms.length > 0 && (
           <span className="text-xs font-semibold text-[#5a524c]">
             Mostrando {startIndex} - {endIndex} de {rooms.length} habitaciones
@@ -82,7 +170,7 @@ export default function RoomTable({
         )}
       </div>
 
-      {/* Tabla con Checkboxes */}
+      {/* Tabla */}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-[#2d2926]">
           <thead className="bg-[#f7f4ed] text-xs font-semibold uppercase text-[#5a524c]">
@@ -99,7 +187,7 @@ export default function RoomTable({
               <th className="py-3 px-4">Imagen</th>
               <th className="py-3 px-4">Número / Título</th>
               <th className="py-3 px-4">Capacidad</th>
-              <th className="py-3 px-4">Tarifas (Lun-Jue / Vie-Dom)</th>
+              <th className="py-3 px-4">Precio Hoy (Exhibición)</th>
               <th className="py-3 px-4">Estado</th>
               <th className="py-3 px-4 text-center">Acciones</th>
             </tr>
@@ -115,6 +203,7 @@ export default function RoomTable({
               rooms.map((room) => {
                 const roomIdStr = String(room.id);
                 const isSelected = selectedRoomIds.includes(roomIdStr);
+                const currentRate = getCurrentDayRateInfo(room);
 
                 return (
                   <tr
@@ -153,20 +242,37 @@ export default function RoomTable({
                     <td className="py-3 px-4 font-bold text-[#2d2926]">
                       {room.number ? `Hab. ${room.number}` : room.title}
                     </td>
-                    <td className="py-3 px-4 text-xs text-[#5a524c]">{renderCapacity(room)}</td>
-                    <td className="py-3 px-4 font-mono text-xs">
-                      <span className="font-semibold text-[#2d2926]">
-                        {room.ratesConfig?.baseWeekdayPrice
-                          ? `$${room.ratesConfig.baseWeekdayPrice}`
-                          : room.priceRegular || room.priceMin || '$0'}
-                      </span>
-                      <span className="text-[#988f86]"> / </span>
-                      <span className="font-semibold text-[#d95d39]">
-                        {room.ratesConfig?.baseWeekendPrice
-                          ? `$${room.ratesConfig.baseWeekendPrice}`
-                          : room.priceHigh || '$0'}
-                      </span>
+                    <td className="py-3 px-4 text-xs text-[#5a524c]">
+                      {renderCapacity(room)}
                     </td>
+
+                    {/* Columna Precio Hoy con Identificador de Temporada / Color */}
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col items-start gap-1">
+                        <span className="font-mono font-bold text-sm text-[#2d2926]">
+                          ${currentRate.price.toLocaleString('es-MX')} MXN
+                        </span>
+
+                        {currentRate.isSeason ? (
+                          <span
+                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs"
+                            style={{ backgroundColor: currentRate.color }}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
+                            {currentRate.label}
+                          </span>
+                        ) : currentRate.isSpecial ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fee2e2] text-[#991b1b] border border-[#fca5a5]">
+                            ★ {currentRate.label}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-[#988f86] font-medium">
+                            Tarifa {currentRate.label}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
                     <td className="py-3 px-4">
                       {room.status && (
                         <span
@@ -180,7 +286,6 @@ export default function RoomTable({
                     </td>
                     <td className="py-3 px-4 text-center">
                       <div className="flex justify-center items-center gap-1.5">
-                        {/* Botón Gestión de Tarifas */}
                         {onConfigureRates && (
                           <button
                             type="button"

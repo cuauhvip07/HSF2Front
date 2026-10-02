@@ -12,6 +12,16 @@ interface ViewRoomModalProps {
   onConfigureRatesClick?: (room: Room) => void;
 }
 
+const WEEKDAY_MAP: Record<number, string> = {
+  0: 'D', // Domingo
+  1: 'L', // Lunes
+  2: 'M', // Martes
+  3: 'X', // Miércoles
+  4: 'J', // Jueves
+  5: 'V', // Viernes
+  6: 'S', // Sábado
+};
+
 export default function ViewRoomModal({
   isOpen,
   room,
@@ -53,16 +63,39 @@ export default function ViewRoomModal({
   const seasons = room.ratesConfig?.seasons || [];
   const specialDates = room.ratesConfig?.specialDates || [];
 
-  // 🌟 LÓGICA DE Detección de Tarifa Vigente HOY
-  const todayISO = new Date().toISOString().split('T')[0];
+  // Lógica de detección de tarifa vigente HOY con soporte de diferenciación por fin de semana y color
+  const today = new Date();
+  const todayISO = today.toISOString().split('T')[0];
+  const dayKey = WEEKDAY_MAP[today.getDay()];
 
-  // Evaluar si hoy cae en un día especial / ocio
+  // 1. Evaluar si hoy cae en un día especial / festivo
   const activeSpecialDate = specialDates.find((sp) => sp.date === todayISO);
 
-  // Evaluar si hoy cae dentro del rango de alguna temporada
-  const activeSeason = seasons.find((s) => {
-    return todayISO >= s.startDate && todayISO <= s.endDate;
+  // 2. Evaluar si hoy cae dentro del rango de alguna temporada
+  const activeSeason: any = seasons.find((s: any) => {
+    return s.startDate && s.endDate && todayISO >= s.startDate && todayISO <= s.endDate;
   });
+
+  // Calcular el precio exacto de hoy si hay temporada
+  let activeSeasonPrice = 0;
+  let isSeasonWeekendRate = false;
+
+  if (activeSeason) {
+    isSeasonWeekendRate =
+      Boolean(activeSeason.weekendPricePerNight) &&
+      Boolean(activeSeason.weekendDays?.includes(dayKey));
+
+    activeSeasonPrice = isSeasonWeekendRate
+      ? activeSeason.weekendPricePerNight
+      : activeSeason.pricePerNight;
+  }
+
+  // Tarifa activa general para el banner principal
+  const activePrice = activeSpecialDate
+    ? activeSpecialDate.pricePerNight
+    : activeSeason
+    ? activeSeasonPrice
+    : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2d2926]/60 backdrop-blur-sm animate-fade-in">
@@ -117,24 +150,41 @@ export default function ViewRoomModal({
             )}
           </div>
 
-          {/* 🌟 TARJETA DE ALERTA: TARIFA APLICABLE HOY SI HAY TEMPORADA / DÍA ESPECIAL */}
+          {/* TARJETA DE ALERTA: TARIFA APLICABLE HOY CON BADGE Y COLOR DE LA TEMPORADA */}
           {(activeSpecialDate || activeSeason) && (
-            <div className="p-4 rounded-xl border bg-[#fff7ed] border-[#ffedd5] shadow-sm flex items-center justify-between">
+            <div
+              className="p-4 rounded-xl border shadow-xs flex items-center justify-between"
+              style={{
+                backgroundColor: activeSeason?.color ? `${activeSeason.color}15` : '#fff7ed',
+                borderColor: activeSeason?.color ? `${activeSeason.color}40` : '#ffedd5',
+              }}
+            >
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#c2410c] block">
-                  🔥 Tarifa Activa Hoy ({todayISO})
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white uppercase tracking-wider mb-1"
+                  style={{
+                    backgroundColor: activeSpecialDate ? '#d95d39' : activeSeason?.color || '#c0a060',
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
+                  {activeSpecialDate ? 'Día Especial' : activeSeason?.name}
                 </span>
-                <p className="text-sm font-bold text-[#2d2926] mt-0.5">
+                <p className="text-xs font-bold text-[#2d2926] mt-1">
                   {activeSpecialDate
-                    ? `Día Especial: ${activeSpecialDate.reason || 'Fecha de Ocio/Alta Demanda'}`
-                    : `Temporada Activa: ${activeSeason?.name}`}
+                    ? activeSpecialDate.reason || 'Fecha de Alta Demanda'
+                    : isSeasonWeekendRate
+                    ? `Tarifa Diferenciada de Fin de Semana (${dayKey})`
+                    : 'Tarifa Base de Temporada'}
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-xl font-mono font-extrabold text-[#d95d39]">
-                  ${activeSpecialDate?.pricePerNight || activeSeason?.pricePerNight} MXN
+                <span
+                  className="text-xl font-mono font-extrabold"
+                  style={{ color: activeSpecialDate ? '#d95d39' : activeSeason?.color || '#d95d39' }}
+                >
+                  ${activePrice?.toLocaleString('es-MX')} MXN
                 </span>
-                <span className="text-[10px] text-[#7c2d12] block">por noche</span>
+                <span className="text-[10px] text-[#5a524c] block font-semibold">por noche</span>
               </div>
             </div>
           )}
@@ -147,6 +197,7 @@ export default function ViewRoomModal({
               </p>
               {onConfigureRatesClick && (
                 <button
+                  type="button"
                   onClick={() => {
                     onClose();
                     onConfigureRatesClick(room);
@@ -204,40 +255,59 @@ export default function ViewRoomModal({
               )}
             </div>
 
-            {/* 2. Listado de Temporadas Configuradas */}
+            {/* 2. Listado de Temporadas Configuradas con Color e Indicador Diferenciado */}
             <div className="pt-2 border-t border-[#e5ded0]/60">
               <span className="text-[11px] font-bold text-[#c0a060] uppercase block mb-1.5">
                 2. Temporadas de Año ({seasons.length})
               </span>
               {seasons.length > 0 ? (
-                <div className="space-y-1.5">
-                  {seasons.map((s) => (
-                    <div
-                      key={s.id}
-                      className={`p-2 rounded-lg border text-xs flex justify-between items-center ${
-                        todayISO >= s.startDate && todayISO <= s.endDate
-                          ? 'bg-[#fff7ed] border-[#fdba74]'
-                          : 'bg-white border-[#e5ded0]'
-                      }`}
-                    >
-                      <div>
-                        <span className="font-bold text-[#2d2926]">{s.name}</span>
-                        <span className="text-[10px] text-[#5a524c] block">
-                          Del {s.startDate} al {s.endDate}
-                        </span>
+                <div className="space-y-2">
+                  {seasons.map((s: any) => {
+                    const isCurrentActive = todayISO >= s.startDate && todayISO <= s.endDate;
+
+                    return (
+                      <div
+                        key={s.id}
+                        className={`p-3 rounded-lg border text-xs flex justify-between items-center ${
+                          isCurrentActive ? 'bg-white ring-2 ring-offset-1' : 'bg-white border-[#e5ded0]'
+                        }`}
+                        style={{
+                          borderColor: isCurrentActive ? s.color || '#c0a060' : '#e5ded0',
+                        }}
+                      >
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: s.color || '#c0a060' }}
+                            />
+                            <span className="font-bold text-[#2d2926]">{s.name}</span>
+                          </div>
+                          <span className="text-[10px] text-[#5a524c] block">
+                            Del {s.startDate} al {s.endDate}
+                          </span>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="font-mono font-bold text-[#2d2926] block">
+                            Base: ${s.pricePerNight} MXN
+                          </span>
+                          {s.weekendPricePerNight ? (
+                            <span className="font-mono font-bold text-[#d95d39] text-[10px] block">
+                              {s.weekendDays?.join(', ') || 'S, D'}: ${s.weekendPricePerNight} MXN
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
-                      <span className="font-mono font-bold text-[#d95d39]">
-                        ${s.pricePerNight} MXN/noche
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-xs text-[#988f86] italic">No hay temporadas configuradas.</p>
               )}
             </div>
 
-            {/* 3. Listado de Días Especiales / Ocio / Puentes */}
+            {/* 3. Listado de Días Especiales / Festivos */}
             <div className="pt-2 border-t border-[#e5ded0]/60">
               <span className="text-[11px] font-bold text-[#d95d39] uppercase block mb-1.5">
                 3. Días Especiales / Fechas de Ocio ({specialDates.length})
