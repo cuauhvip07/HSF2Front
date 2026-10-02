@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import RoomFilters from '@/components/admin/rooms/RoomFilters';
 import RoomTable from '@/components/admin/rooms/RoomTable';
 import ViewRoomModal from '@/components/admin/rooms/ViewRoomModal';
@@ -8,41 +9,45 @@ import EditRoomModal from '@/components/admin/rooms/EditRoomModal';
 import RoomRatesModal from '@/components/admin/rooms/RoomRatesModal';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import { Room, RoomRatesConfig } from '@/types/room';
+import { updateRoomRates, deleteRoom, deleteBulkRooms } from '@/services/roomService';
 
 interface RoomsClientProps {
   initialRooms: Room[];
+  availableRoomTypes?: string[];
 }
 
-export default function RoomsClient({ initialRooms }: RoomsClientProps) {
+export default function RoomsClient({
+  initialRooms,
+  availableRoomTypes = [],
+}: RoomsClientProps) {
+  const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
   const [selectedType, setSelectedType] = useState('Todos');
 
-  // Selección Múltiple
+  useEffect(() => {
+    setRooms(initialRooms);
+  }, [initialRooms]);
+
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([]);
 
-  // Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Modales
   const [viewingRoom, setViewingRoom] = useState<Room | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Modal para Gestión de Tarifas y Temporadas
   const [ratesRoom, setRatesRoom] = useState<Room | null>(null);
   const [isRatesModalOpen, setIsRatesModalOpen] = useState(false);
 
-  // Eliminación (Individual y Masiva)
   const [deletingRoom, setDeletingRoom] = useState<Room | null>(null);
   const [isBulkDelete, setIsBulkDelete] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Handlers para Selección
   const handleSelectRoom = (id: string) => {
     setSelectedRoomIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -58,7 +63,6 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
     }
   };
 
-  // Handlers de Apertura de Modales
   const handleViewClick = (room: Room) => {
     setViewingRoom(room);
     setIsViewModalOpen(true);
@@ -86,45 +90,58 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
     setIsDeleteModalOpen(true);
   };
 
-  // Confirmar Eliminación
-  const handleConfirmDelete = () => {
-    if (isBulkDelete) {
-      setRooms((prev) => prev.filter((r) => !selectedRoomIds.includes(String(r.id))));
-      setSelectedRoomIds([]);
-    } else if (deletingRoom) {
-      setRooms((prev) => prev.filter((item) => String(item.id) !== String(deletingRoom.id)));
-      setSelectedRoomIds((prev) => prev.filter((id) => id !== String(deletingRoom.id)));
+  const handleConfirmDelete = async () => {
+    try {
+      if (isBulkDelete) {
+        await deleteBulkRooms(selectedRoomIds);
+        setRooms((prev) => prev.filter((r) => !selectedRoomIds.includes(String(r.id))));
+        setSelectedRoomIds([]);
+      } else if (deletingRoom) {
+        await deleteRoom(deletingRoom.id);
+        setRooms((prev) => prev.filter((item) => String(item.id) !== String(deletingRoom.id)));
+        setSelectedRoomIds((prev) => prev.filter((id) => id !== String(deletingRoom.id)));
+      }
+      router.refresh();
+    } catch (error) {
+      console.error('Error al eliminar habitación(es):', error);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setDeletingRoom(null);
+      setIsBulkDelete(false);
     }
-    setIsDeleteModalOpen(false);
-    setDeletingRoom(null);
-    setIsBulkDelete(false);
   };
 
   const handleSaveRoom = (updatedRoom: Room) => {
     setRooms((prev) =>
       prev.map((item) => (String(item.id) === String(updatedRoom.id) ? updatedRoom : item))
     );
+    router.refresh();
   };
 
-  // Guardar Esquema de Tarifas
-  const handleSaveRates = (roomId: string | number, newConfig: RoomRatesConfig) => {
-    setRooms((prev) =>
-      prev.map((item) => {
-        if (String(item.id) === String(roomId)) {
-          return {
-            ...item,
-            ratesConfig: newConfig,
-            priceRegular: `$${newConfig.baseWeekdayPrice} MXN`,
-            priceHigh: `$${newConfig.baseWeekendPrice} MXN`,
-            price: `$${newConfig.baseWeekdayPrice.toLocaleString('es-MX')} MXN`,
-          };
-        }
-        return item;
-      })
-    );
+  const handleSaveRates = async (roomId: string | number, newConfig: RoomRatesConfig) => {
+    try {
+      await updateRoomRates(roomId, newConfig);
+
+      setRooms((prev) =>
+        prev.map((item) => {
+          if (String(item.id) === String(roomId)) {
+            return {
+              ...item,
+              ratesConfig: newConfig,
+              priceRegular: `$${newConfig.baseWeekdayPrice} MXN`,
+              priceHigh: `$${newConfig.baseWeekendPrice} MXN`,
+              price: `$${newConfig.baseWeekdayPrice.toLocaleString('es-MX')} MXN`,
+            };
+          }
+          return item;
+        })
+      );
+      router.refresh();
+    } catch (error) {
+      console.error('Error al guardar esquema de tarifas:', error);
+    }
   };
 
-  // Filtrado y Paginación
   const filteredRooms = rooms.filter((room) => {
     const roomNumber = room.number ? String(room.number) : '';
     const roomType = room.type ? room.type.toLowerCase() : '';
@@ -132,18 +149,22 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
     const roomId = String(room.id);
     const roomStatus = room.status ? room.status.toLowerCase() : '';
 
+    const searchLower = searchTerm.toLowerCase();
+
     const matchesSearch =
-      roomNumber.includes(searchTerm) ||
-      roomType.includes(searchTerm.toLowerCase()) ||
-      roomTitle.includes(searchTerm.toLowerCase()) ||
-      roomId.includes(searchTerm) ||
-      roomStatus.includes(searchTerm.toLowerCase());
+      roomNumber.includes(searchLower) ||
+      roomType.includes(searchLower) ||
+      roomTitle.includes(searchLower) ||
+      roomId.includes(searchLower) ||
+      roomStatus.includes(searchLower);
 
     const matchesStatus =
-      selectedStatus === 'Todos' || room.status === selectedStatus;
+      selectedStatus === 'Todos' || roomStatus === selectedStatus.toLowerCase();
 
     const matchesType =
-      selectedType === 'Todos' || room.type === selectedType || room.title === selectedType;
+      selectedType === 'Todos' ||
+      roomType === selectedType.toLowerCase() ||
+      roomTitle === selectedType.toLowerCase();
 
     return matchesSearch && matchesStatus && matchesType;
   });
@@ -166,7 +187,6 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
           </p>
         </div>
 
-        {/* Filtros + Eliminación Masiva */}
         <RoomFilters
           searchTerm={searchTerm}
           setSearchTerm={(term) => {
@@ -183,6 +203,7 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
             setSelectedType(type);
             setCurrentPage(1);
           }}
+          availableRoomTypes={availableRoomTypes}
           itemsPerPage={itemsPerPage}
           setItemsPerPage={(pageSize) => {
             setItemsPerPage(pageSize);
@@ -193,7 +214,6 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
           onNewRoom={() => alert('Abrir modal para agregar nueva habitación')}
         />
 
-        {/* Tabla Paginada con Checkboxes */}
         <RoomTable
           rooms={paginatedRooms}
           currentPage={currentPage}
@@ -210,7 +230,6 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
         />
       </main>
 
-      {/* Modal Ver Detalle */}
       <ViewRoomModal
         isOpen={isViewModalOpen}
         room={viewingRoom}
@@ -222,10 +241,10 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
         onConfigureRatesClick={handleConfigureRatesClick}
       />
 
-      {/* Modal Editar */}
       <EditRoomModal
         isOpen={isEditModalOpen}
         room={editingRoom}
+        availableRoomTypes={availableRoomTypes}
         onClose={() => {
           setIsEditModalOpen(false);
           setEditingRoom(null);
@@ -233,7 +252,6 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
         onSave={handleSaveRoom}
       />
 
-      {/* Modal para Gestión de Tarifas / Temporadas */}
       <RoomRatesModal
         isOpen={isRatesModalOpen}
         room={ratesRoom}
@@ -244,7 +262,6 @@ export default function RoomsClient({ initialRooms }: RoomsClientProps) {
         onSaveRates={handleSaveRates}
       />
 
-      {/* Modal Reutilizable de Confirmación de Eliminación */}
       <ConfirmDeleteModal
         isOpen={isDeleteModalOpen}
         itemName={

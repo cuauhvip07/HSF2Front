@@ -3,22 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Room } from '@/types/room';
+import { updateRoom } from '@/services/roomService';
 import ImageUploader from './ImageUploader';
 
 interface EditRoomModalProps {
   isOpen: boolean;
   room: Room | null;
+  availableRoomTypes?: string[];
   onClose: () => void;
   onSave: (updatedRoom: Room) => void;
 }
-
-const roomTypes = [
-  'Suite Presidencial',
-  'Suite Jr.',
-  'Habitación Doble',
-  'Habitación Estándar',
-  'Habitación Cuádruple',
-];
 
 const statusOptions = ['Disponible', 'Ocupada', 'Limpieza', 'Mantenimiento'];
 const housekeepingOptions = ['Limpia', 'Pendiente'];
@@ -26,6 +20,7 @@ const housekeepingOptions = ['Limpia', 'Pendiente'];
 export default function EditRoomModal({
   isOpen,
   room,
+  availableRoomTypes = [],
   onClose,
   onSave,
 }: EditRoomModalProps) {
@@ -71,7 +66,7 @@ export default function EditRoomModal({
     setValue('image', previewUrl);
   };
 
-  const onSubmit = (data: Room) => {
+  const onSubmit = async (data: Room) => {
     const formattedCapacity = `${data.adults} Ad${
       (data.children ?? 0) > 0 ? `, ${data.children} Niñ` : ''
     }`;
@@ -84,32 +79,13 @@ export default function EditRoomModal({
       image: newImagePreview || data.image,
     };
 
-    /* ========================================================================
-       PETICIÓN AL BACKEND (FETCH OPCIONAL PARA EDITAR HABITACIÓN)
-       URL Endpoint: PUT http://localhost:4000/api/v1/rooms/${room.id}
-       ========================================================================
-
     try {
-      const response = await fetch(`http://localhost:4000/api/v1/rooms/${room.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedRoom),
-      });
-
-      if (!response.ok) throw new Error('Error al actualizar la habitación');
-
-      const savedData = await response.json();
-      onSave(savedData);
+      const savedRoom = await updateRoom(updatedRoom);
+      onSave(savedRoom || updatedRoom);
       onClose();
     } catch (error) {
-      console.error('Error al guardar cambios:', error);
+      console.error('Error al actualizar habitación en Express:', error);
     }
-    ======================================================================== */
-
-    onSave(updatedRoom);
-    onClose();
   };
 
   return (
@@ -136,13 +112,11 @@ export default function EditRoomModal({
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 flex flex-col gap-5">
-          {/* UPLOADER DE IMAGEN */}
           <ImageUploader
             currentImage={room.image}
             onImageSelected={handleImageSelected}
           />
 
-          {/* Número y Tipo */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#5a524c] mb-1">
@@ -152,20 +126,11 @@ export default function EditRoomModal({
                 type="text"
                 {...register('number', {
                   required: 'El número de habitación es obligatorio',
-                  pattern: {
-                    value: /^[0-9A-Za-z-]+$/,
-                    message: 'Solo se permiten números y letras sin espacios',
-                  },
                 })}
                 className={`w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border rounded-xl text-sm font-bold text-[#2d2926] focus:outline-none transition-colors ${
                   errors.number ? 'border-[#d95d39]' : 'border-[#e5ded0] focus:border-[#c0a060]'
                 }`}
               />
-              {errors.number && (
-                <p className="text-[11px] text-[#d95d39] mt-1 font-medium">
-                  {errors.number.message}
-                </p>
-              )}
             </div>
 
             <div>
@@ -176,7 +141,7 @@ export default function EditRoomModal({
                 {...register('type', { required: 'Selecciona una categoría' })}
                 className="w-full px-3.5 py-2.5 bg-[#f7f4ed]/50 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#2d2926] focus:outline-none focus:border-[#c0a060]"
               >
-                {roomTypes.map((t) => (
+                {availableRoomTypes.map((t) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
@@ -185,7 +150,6 @@ export default function EditRoomModal({
             </div>
           </div>
 
-          {/* CAPACIDAD: SELECTORES PURAMENTE NUMÉRICOS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#f7f4ed]/40 p-4 rounded-xl border border-[#e5ded0]">
             <div>
               <label className="block text-xs font-semibold text-[#5a524c] mb-1">
@@ -220,26 +184,6 @@ export default function EditRoomModal({
             </div>
           </div>
 
-          {/* TARIFA DESHABILITADA (SE GESTIONA EN EL MODAL DE TARIFAS) */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-semibold text-[#5a524c]">
-                Tarifa General / Base (Solo lectura)
-              </label>
-              <span className="text-[10px] text-[#c0a060] font-bold">
-                🔒 Configurable en "Gestión de Tarifas"
-              </span>
-            </div>
-            <input
-              type="text"
-              disabled
-              readOnly
-              {...register('price')}
-              className="w-full px-3.5 py-2.5 bg-[#e5ded0]/40 border border-[#e5ded0] rounded-xl text-sm font-semibold text-[#988f86] cursor-not-allowed select-none"
-            />
-          </div>
-
-          {/* Estado de Ocupación y Limpieza */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#5a524c] mb-1">
@@ -274,7 +218,6 @@ export default function EditRoomModal({
             </div>
           </div>
 
-          {/* Botones de Acción */}
           <div className="flex items-center justify-end gap-3 border-t border-[#e5ded0] pt-5 mt-2">
             <button
               type="button"
@@ -288,7 +231,7 @@ export default function EditRoomModal({
               disabled={isSubmitting}
               className="px-6 py-2.5 rounded-xl bg-[#d95d39] hover:bg-[#c44f2e] text-white text-xs font-bold transition-all shadow-sm tracking-wider uppercase disabled:opacity-50"
             >
-              Guardar Cambios
+              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
             </button>
           </div>
         </form>
